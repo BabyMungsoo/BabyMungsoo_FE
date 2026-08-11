@@ -4,3 +4,7 @@ dist
 android
 ios
 docs/openapi.json
+
+# expo start 가 실행될 때마다 Expo 가 자기 포맷으로 다시 씁니다.
+# Prettier 와 서로 덮어쓰며 diff 가 생기는 걸 막으려고 제외합니다.
+tsconfig.json

@@ -8,16 +8,16 @@
 
 ## 기술 스택
 
-| 영역        | 선택                                    |
-| ----------- | --------------------------------------- |
-| 프레임워크  | Expo SDK 57 + React Native 0.86         |
-| 언어        | TypeScript                              |
-| 라우팅      | Expo Router (파일 기반, `src/app/`)     |
-| 스타일링    | NativeWind (Tailwind CSS 문법)          |
-| 서버 상태   | TanStack Query v5                       |
-| 클라 상태   | Zustand                                 |
-| HTTP        | Axios                                   |
-| 포맷/린트   | Prettier + ESLint (eslint-config-expo)  |
+| 영역       | 선택                                   |
+| ---------- | -------------------------------------- |
+| 프레임워크 | Expo SDK 57 + React Native 0.86        |
+| 언어       | TypeScript                             |
+| 라우팅     | Expo Router (파일 기반, `src/app/`)    |
+| 스타일링   | NativeWind (Tailwind CSS 문법)         |
+| 서버 상태  | TanStack Query v5                      |
+| 클라 상태  | Zustand                                |
+| HTTP       | Axios                                  |
+| 포맷/린트  | Prettier + ESLint (eslint-config-expo) |
 
 ---
 
@@ -161,14 +161,14 @@ chore: eslint 설정 추가
 
 ## 스크립트
 
-| 명령                   | 설명                        |
-| ---------------------- | --------------------------- |
-| `npm start`            | Expo 개발 서버              |
-| `npm run ios`          | iOS 시뮬레이터로 실행       |
-| `npm run android`      | Android 에뮬레이터로 실행   |
-| `npm run lint`         | ESLint                      |
-| `npm run format`       | Prettier 포맷 적용          |
-| `npm run typecheck`    | TypeScript 타입 검사        |
-| `npm run api:sync`     | 스웨거 스냅샷 갱신          |
+| 명령                | 설명                      |
+| ------------------- | ------------------------- |
+| `npm start`         | Expo 개발 서버            |
+| `npm run ios`       | iOS 시뮬레이터로 실행     |
+| `npm run android`   | Android 에뮬레이터로 실행 |
+| `npm run lint`      | ESLint                    |
+| `npm run format`    | Prettier 포맷 적용        |
+| `npm run typecheck` | TypeScript 타입 검사      |
+| `npm run api:sync`  | 스웨거 스냅샷 갱신        |
 
 PR 올리기 전에 `npm run lint && npm run typecheck` 는 통과시켜 주세요.
