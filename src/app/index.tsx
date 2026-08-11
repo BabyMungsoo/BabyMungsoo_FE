@@ -1,98 +1,52 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { API_BASE_URL } from '@/api';
+import { usePets } from '@/hooks/queries/use-pets';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
-
+/**
+ * 백엔드 연결 확인용 임시 화면입니다.
+ * 각자 기능 브랜치에서 실제 화면으로 교체해 주세요.
+ */
 export default function HomeScreen() {
+  const { data: pets, isPending, error, refetch } = usePets();
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView contentContainerClassName="gap-4 p-5">
+        <Text className="text-2xl font-bold text-brand-600">아기멍수</Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <View className="gap-1 rounded-xl bg-brand-50 p-4">
+          <Text className="text-xs font-semibold text-brand-700">API BASE URL</Text>
+          <Text className="text-xs text-brand-900">{API_BASE_URL}</Text>
+        </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+        <Text className="text-base font-semibold">GET /pets 연결 확인</Text>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        {isPending && <ActivityIndicator />}
+
+        {error && (
+          <View className="gap-2 rounded-xl bg-red-50 p-4">
+            <Text className="text-sm text-red-700">{error.message}</Text>
+            <Text className="text-xs text-red-500" onPress={() => refetch()}>
+              다시 시도
+            </Text>
+          </View>
+        )}
+
+        {pets?.length === 0 && (
+          <Text className="text-sm text-gray-500">연결은 됐지만 등록된 반려동물이 없습니다.</Text>
+        )}
+
+        {pets?.map((pet) => (
+          <View key={pet.petId} className="gap-1 rounded-xl border border-gray-200 p-4">
+            <Text className="text-base font-semibold">{pet.name}</Text>
+            <Text className="text-sm text-gray-500">
+              {pet.breed} · {pet.age}살 · {pet.gender === 'MALE' ? '수컷' : '암컷'}
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});

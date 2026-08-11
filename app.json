@@ -1,16 +1,19 @@
 {
   "expo": {
-    "name": "BabyMungsoo_FE",
+    "name": "아기멍수",
     "slug": "BabyMungsoo_FE",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "babymungsoofe",
-    "userInterfaceStyle": "automatic",
+    "scheme": "babymungsoo",
+    "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.babymungsoo.app",
+      "supportsTablet": false
     },
     "android": {
+      "package": "com.babymungsoo.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -25,12 +28,20 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
       [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "반려동물 증상 사진을 첨부하려면 사진 접근 권한이 필요해요.",
+          "cameraPermission": "반려동물 증상을 촬영하려면 카메라 접근 권한이 필요해요."
         }
       ]
     ],
