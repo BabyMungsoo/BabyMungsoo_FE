@@ -1,8 +1,6 @@
 import axios, { AxiosError, type AxiosInstance } from 'axios';
 import Constants from 'expo-constants';
 
-import { mockAdapter } from './mock/adapter';
-
 const API_PORT = process.env.EXPO_PUBLIC_API_PORT ?? '8080';
 
 /**
@@ -36,23 +34,11 @@ export function toAbsoluteUrl(path: string | null | undefined): string | undefin
   return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-/**
- * 백엔드 연동 전까지 화면을 확인하려고 켜는 목 모드입니다.
- * `npm run dev:mock` 또는 .env.local 에 EXPO_PUBLIC_USE_MOCK=1 을 넣으면 켜집니다.
- */
-export const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === '1';
-
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15_000,
   headers: { 'Content-Type': 'application/json' },
 });
-
-if (USE_MOCK) {
-  // 어댑터만 갈아끼우면 화면·훅·api 모듈은 그대로 둔 채 가짜 응답을 받습니다
-  api.defaults.adapter = mockAdapter;
-  console.log('[api] 목 데이터 모드로 동작합니다 (EXPO_PUBLIC_USE_MOCK=1)');
-}
 
 /**
  * 인증 토큰 주입 지점.
