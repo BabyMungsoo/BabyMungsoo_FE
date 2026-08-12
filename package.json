@@ -48,6 +48,7 @@
   "scripts": {
     "start": "expo start",
     "dev": "expo start",
+    "dev:mock": "EXPO_PUBLIC_USE_MOCK=1 expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
