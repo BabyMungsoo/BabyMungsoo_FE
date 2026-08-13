@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { recordsApi } from '@/api';
 import { queryKeys } from '@/lib/query-keys';
-import type { AnalysisRecordCreateRequest } from '@/types';
+import type { AnalysisRecordCreateRequest, AnalysisRecordUpdateRequest } from '@/types';
 
 /** GET /records?userId= — 서버가 createdAt 내림차순으로 내려줍니다 */
 export function useRecords(userId: number | undefined) {
@@ -31,11 +31,27 @@ export function useCreateRecord() {
   });
 }
 
+/** PATCH /records/{recordId} */
+export function useUpdateRecord(recordId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: AnalysisRecordUpdateRequest) => recordsApi.update(recordId, body),
+    onSuccess: (updated) => {
+      // 상세는 응답으로 바로 갈아끼우고, 목록은 무효화해서 다시 받아옵니다
+      queryClient.setQueryData(queryKeys.records.detail(recordId), updated);
+      queryClient.invalidateQueries({ queryKey: queryKeys.records.all });
+    },
+  });
+}
+
 /** DELETE /records/{recordId} */
 export function useDeleteRecord() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (recordId: number) => recordsApi.remove(recordId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.records.all }),
+    onSuccess: (_, recordId) => {
+      queryClient.removeQueries({ queryKey: queryKeys.records.detail(recordId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.records.all });
+    },
   });
 }
