@@ -53,6 +53,10 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* 9번 병원 찾기는 탭이 아니라 7번 상세에서 들어오는 화면입니다.
+          (tabs) 안에 둬야 하단 탭바가 그대로 남고, href: null 로 탭 목록에서만 뺍니다. */}
+      <Tabs.Screen name="hospitals" options={{ href: null }} />
+
       <Tabs.Screen
         name="my-page"
         options={{

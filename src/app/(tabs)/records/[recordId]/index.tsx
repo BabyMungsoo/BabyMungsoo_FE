@@ -89,10 +89,15 @@ export default function RecordDetailScreen() {
         <RecordDetailView
           record={record}
           onPressEdit={() => router.push(`/records/${record.recordId}/edit`)}
-          // TODO: 리포트 생성(POST /reports)은 hospitalId 가 필요해서 9번 화면 이후에 붙입니다
+          // TODO: 리포트 생성(POST /reports)은 hospitalId 가 필요해서 9번에서 병원을 고른 뒤에 붙입니다
           onPressShare={() => {}}
-          // TODO: 9번 병원 찾기 화면이 생기면 연결합니다
-          onPressFindHospital={() => {}}
+          // 응급도를 넘겨야 9번에서 그 등급에 맞는 병원을 추천받습니다
+          onPressFindHospital={() =>
+            router.push({
+              pathname: '/hospitals',
+              params: { level: record.emergencyLevel ?? '' },
+            })
+          }
         />
       )}
     </SafeAreaView>
