@@ -31,7 +31,8 @@ export default function RecordDetailScreen() {
 
     try {
       await deleteRecord.mutateAsync(validId);
-      router.back();
+      // 지운 기록의 상세로 되돌아갈 수는 없으니 back 대신 목록으로 보냅니다
+      router.replace('/records');
     } catch (e) {
       await confirm({
         title: '삭제하지 못했습니다',
@@ -45,6 +46,7 @@ export default function RecordDetailScreen() {
       <ScreenHeader
         title="분석 결과"
         showBack
+        backFallback="/records"
         right={
           record && (
             <Pressable

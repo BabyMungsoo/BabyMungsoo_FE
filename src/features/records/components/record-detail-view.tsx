@@ -15,11 +15,11 @@ interface RecordDetailViewProps {
 /**
  * 7번 — 분석 결과 상세. 서버 호출을 모르는 순수 표현 컴포넌트입니다.
  *
- * 백엔드 필드 대응:
- *   제목        suspectedDisease ('위장염(급성)' → '위장염(급성) 가능성 높음')
+ * 백엔드 필드 대응 (features/records/to-record-create-request.ts 의 저장 규칙과 짝):
+ *   제목        suspectedDisease  ← AI 의 title
  *   주요 증상   symptomText 를 쉼표로 분리
- *   AI 분석 요약 aiResult (TEXT 컬럼이라 긴 문장이 들어옵니다)
- *   권장 조치   aiGuide 를 줄바꿈으로 분리
+ *   AI 분석 요약 aiResult          ← AI 의 reason 배열을 합친 것
+ *   권장 조치   aiGuide 를 줄바꿈으로 분리  ← AI 의 guide
  */
 export function RecordDetailView({
   record,
@@ -29,10 +29,9 @@ export function RecordDetailView({
 }: RecordDetailViewProps) {
   const level = toTriageLevel(record.emergencyLevel);
 
-  // suspectedDisease 가 비어 있으면 응급도 라벨(즉시 내원 등)을 제목으로 씁니다
-  const title = record.suspectedDisease
-    ? `${record.suspectedDisease} 가능성 높음`
-    : (level && TRIAGE_LEVEL_META[level].label) || '분석 결과';
+  // suspectedDisease 에는 AI 가 만든 결론 문구가 그대로 들어옵니다
+  // (예: '위장염(급성) 가능성 높음'). 비어 있으면 응급도 라벨로 대신합니다.
+  const title = record.suspectedDisease || (level && TRIAGE_LEVEL_META[level].label) || '분석 결과';
 
   const symptoms = splitLines(record.symptomText, ',');
   const guides = splitLines(record.aiGuide, '\n');
