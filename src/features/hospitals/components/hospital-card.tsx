@@ -125,7 +125,15 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
   );
 }
 
-function InfoRow({ label, value, muted = false }: { label: string; value: string; muted?: boolean }) {
+function InfoRow({
+  label,
+  value,
+  muted = false,
+}: {
+  label: string;
+  value: string;
+  muted?: boolean;
+}) {
   return (
     <View className="flex-row">
       <Text className="w-10 text-sm text-ink-muted">{label}</Text>
