@@ -14,11 +14,13 @@ export function TriageFilter({ value, onChange }: TriageFilterProps) {
   return (
     // flexGrow-0 이 없으면 가로 ScrollView 가 남은 세로 공간을 다 먹어서 칩이 길쭉하게 늘어납니다.
     // items-center 는 칩 높이를 내용에 맞춥니다.
+    // 내용 쪽 grow + justify-center 라야 칩이 다 들어올 땐 가운데 정렬되고,
+    // 넘칠 땐 원래대로 왼쪽부터 차며 스크롤됩니다.
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       style={{ flexGrow: 0 }}
-      contentContainerClassName="items-center gap-2 px-5 py-3"
+      contentContainerClassName="grow items-center justify-center gap-2 px-5 py-3"
     >
       {TRIAGE_FILTERS.map((filter) => {
         const selected = filter.value === value;
