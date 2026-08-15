@@ -18,7 +18,9 @@ export const FALLBACK_CENTER: LatLng = { lat: 37.5665, lng: 126.978 };
 const DEV_LOCATION = parseDevLocation();
 
 function parseDevLocation(): LatLng | null {
-  const raw = process.env.EXPO_PUBLIC_DEV_LOCATION?.trim();
+  // 타입을 적어 두는 이유: expo-env.d.ts 가 .gitignore 라 CI 에는 없습니다.
+  // 그 파일이 없으면 process.env 가 any 라서 아래 split·map 이 암묵적 any 로 걸립니다.
+  const raw: string | undefined = process.env.EXPO_PUBLIC_DEV_LOCATION?.trim();
   if (!raw) return null;
 
   const [lat, lng] = raw.split(',').map((part) => Number(part.trim()));

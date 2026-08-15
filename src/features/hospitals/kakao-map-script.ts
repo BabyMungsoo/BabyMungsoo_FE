@@ -1,14 +1,20 @@
 import type { Hospital, LatLng } from '@/types';
 
-/** 카카오 developers > 앱 키 > JavaScript 키 (REST 키와 다릅니다) */
-export const KAKAO_JS_KEY = process.env.EXPO_PUBLIC_KAKAO_JS_KEY?.trim() ?? '';
+/**
+ * 카카오 developers > 앱 키 > JavaScript 키 (REST 키와 다릅니다)
+ *
+ * 타입을 적어 두는 이유: expo-env.d.ts 가 .gitignore 라 CI 에는 없습니다.
+ * 그 파일이 없으면 process.env 가 any 로 풀려서, 여기서 나온 값을 쓰는 쪽이
+ * 조용히 타입 검사를 빠져나갑니다.
+ */
+export const KAKAO_JS_KEY: string = process.env.EXPO_PUBLIC_KAKAO_JS_KEY?.trim() ?? '';
 
 /**
  * 카카오맵 JS SDK 는 요청 도메인을 카카오에 등록된 플랫폼 목록과 대조합니다.
  * 앱(WebView)은 로컬 HTML 이라 원래 도메인이 없어서, baseUrl 로 등록된 도메인을
  * 알려 줘야 지도가 뜹니다. Expo 웹 개발 서버와 같은 값을 쓰면 등록이 한 번으로 끝납니다.
  */
-export const KAKAO_WEB_ORIGIN =
+export const KAKAO_WEB_ORIGIN: string =
   process.env.EXPO_PUBLIC_KAKAO_WEB_ORIGIN?.trim() || 'http://localhost:8081';
 
 /** autoload=false 로 받아 kakao.maps.load() 안에서 지도를 만듭니다 */
