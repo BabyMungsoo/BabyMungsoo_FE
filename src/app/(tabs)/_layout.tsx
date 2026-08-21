@@ -53,6 +53,11 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/*
+        분석 진행·결과(8·4번)는 홈에서 넘어가는 화면이라 탭바에는 띄우지 않습니다.
+        href 를 null 로 두지 않으면 expo-router 가 폴더를 보고 탭을 하나 더 만듭니다.
+      */}
+      <Tabs.Screen name="analysis" options={{ href: null }} />
       <Tabs.Screen
         name="my-page"
         options={{
