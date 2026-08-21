@@ -2,6 +2,8 @@ import type {
   Answer,
   AnswerCreateRequest,
   Question,
+  TriageAnalyzeRequest,
+  TriageAnalyzeResult,
   TriageSession,
   TriageSessionCreateRequest,
 } from '@/types';
@@ -44,6 +46,12 @@ export const triageApi = {
   /** POST /triage/sessions/{sessionId}/complete — 문진 종료(AI 분석 준비 완료) */
   completeSession: async (sessionId: number) => {
     const { data } = await api.post<TriageSession>(`/triage/sessions/${sessionId}/complete`);
+    return data;
+  },
+
+  /** POST /triage/analyze — 완료된 세션을 AI 로 분석. 같은 세션은 기존 결과를 그대로 돌려줍니다 */
+  analyze: async (body: TriageAnalyzeRequest) => {
+    const { data } = await api.post<TriageAnalyzeResult>('/triage/analyze', body);
     return data;
   },
 };
