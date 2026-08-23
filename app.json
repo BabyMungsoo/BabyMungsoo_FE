@@ -10,7 +10,17 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.babymungsoo.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSExceptionDomains": {
+            "daumcdn.net": {
+              "NSIncludesSubdomains": true,
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
+      }
     },
     "android": {
       "package": "com.babymungsoo.app",
