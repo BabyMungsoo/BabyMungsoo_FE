@@ -1,0 +1,27 @@
+# CodeRabbit 설정
+# https://docs.coderabbit.ai/reference/configuration
+
+language: "ko-KR"
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!node_modules/**"
+    - "!ios/**"
+    - "!android/**"
+    - "!.expo/**"
+    - "!**/*.lock"
+    - "!package-lock.json"
+    - "!**/*.svg"
+    - "!assets/**"
+
+chat:
+  auto_reply: true
