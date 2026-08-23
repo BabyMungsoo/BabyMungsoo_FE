@@ -1,5 +1,7 @@
+import { Image } from 'expo-image';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { toAbsoluteUrl } from '@/api';
 import { TriageBadge } from '@/components/ui/triage-badge';
 import { TRIAGE_LEVEL_META, toTriageLevel } from '@/constants/triage';
 import { formatDateTime } from '@/lib/format';
@@ -20,6 +22,9 @@ interface RecordDetailViewProps {
  *   주요 증상   symptomText 를 쉼표로 분리
  *   AI 분석 요약 aiResult          ← AI 의 reason 배열을 합친 것
  *   권장 조치   aiGuide 를 줄바꿈으로 분리  ← AI 의 guide
+ *
+ * 사진(photoUrl)은 record ↔ media 연결 필드가 백엔드에 아직 없어 항상 비어 있습니다.
+ * 값이 있을 때만 그리므로, 나중에 채워지면 코드 수정 없이 나타납니다.
  */
 export function RecordDetailView({
   record,
@@ -48,7 +53,16 @@ export function RecordDetailView({
           elevation: 1,
         }}
       >
-        <View className="flex-row items-center gap-2">
+        {!!record.photoUrl && (
+          <Image
+            source={{ uri: toAbsoluteUrl(record.photoUrl) }}
+            style={{ height: 180, width: '100%', borderRadius: 16 }}
+            contentFit="cover"
+            transition={150}
+          />
+        )}
+
+        <View className={`flex-row items-center gap-2 ${record.photoUrl ? 'mt-4' : ''}`}>
           {level && <TriageBadge level={level} />}
           <Text className="flex-1 text-lg font-bold text-ink">{title}</Text>
         </View>
