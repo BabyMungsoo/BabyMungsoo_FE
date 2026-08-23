@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { HealthTipsSection } from '@/features/home/health-tips-section';
@@ -88,9 +88,9 @@ export default function HomeScreen() {
           {error && (
             <View className="gap-2 rounded-2xl bg-red-50 p-4">
               <Text className="text-sm text-red-700">{error.message}</Text>
-              <Text className="text-xs font-semibold text-red-500" onPress={() => refetch()}>
-                다시 시도
-              </Text>
+              <Pressable onPress={() => refetch()} accessibilityRole="button">
+                <Text className="text-xs font-semibold text-red-500">다시 시도</Text>
+              </Pressable>
             </View>
           )}
 
@@ -111,12 +111,16 @@ export default function HomeScreen() {
 
           <MediaUploadGrid onMediaIdsChange={setMediaIds} />
 
-          <Text
-            onPress={isStarting ? undefined : handleStartAnalysis}
-            className="rounded-2xl bg-brand-400 py-4 text-center text-base font-bold text-ink"
+          <Pressable
+            onPress={handleStartAnalysis}
+            disabled={isStarting}
+            accessibilityRole="button"
+            className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
           >
-            {isStarting ? '분석 준비 중...' : 'AI 분석 시작하기'}
-          </Text>
+            <Text className="text-center text-base font-bold text-ink">
+              {isStarting ? '분석 준비 중...' : 'AI 분석 시작하기'}
+            </Text>
+          </Pressable>
 
           <HealthTipsSection />
         </View>
