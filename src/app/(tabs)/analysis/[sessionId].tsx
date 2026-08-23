@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,8 +7,11 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { AnalyzingView } from '@/features/analysis/components/analyzing-view';
 import { ResultView, type QuickGuideKey } from '@/features/analysis/components/result-view';
 import { useFakeProgress } from '@/features/analysis/use-fake-progress';
+import { toRecordCreateRequest } from '@/features/records/to-record-create-request';
+import { useCreateRecord } from '@/hooks/queries/use-records';
 import { useTriageAnalysis, useTriageSession } from '@/hooks/queries/use-triage';
 import { confirm } from '@/lib/confirm';
+import { useCurrentUserId } from '@/stores/use-session-store';
 
 /** 게이지가 100% 를 채우는 걸 보여준 뒤 결과로 넘깁니다 */
 const COMPLETE_HOLD_MS = 500;
@@ -42,6 +45,29 @@ export default function AnalysisScreen() {
     const timer = setTimeout(() => setShowResult(true), COMPLETE_HOLD_MS);
     return () => clearTimeout(timer);
   }, [isReady]);
+
+  // 분석 결과를 기록으로 남깁니다 (분석기록 6·7번 화면에 나타나려면 필요).
+  // 세션당 한 번만 저장하도록 ref 로 막습니다 — 멱등 분석 API 특성상
+  // 재렌더/재조회로 result 가 다시 와도 같은 세션이면 다시 저장하지 않습니다.
+  const userId = useCurrentUserId();
+  const { mutate: createRecord } = useCreateRecord();
+  const savedSessionRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    const sessionData = session.data;
+    if (result == null || sessionData == null || userId == null) return;
+    if (savedSessionRef.current === validId) return;
+    savedSessionRef.current = validId;
+
+    createRecord(
+      toRecordCreateRequest({
+        result,
+        userId,
+        dogId: sessionData.petId,
+        symptomText: sessionData.initialSymptom,
+      }),
+    );
+  }, [result, session.data, userId, validId, createRecord]);
 
   // isReady 를 함께 확인해, 아직 안 끝났는데 결과로 넘어가는 일이 없게 합니다.
   // (effect 안에서 setShowResult(false) 를 호출하면 렌더가 연쇄로 다시 돕니다)
