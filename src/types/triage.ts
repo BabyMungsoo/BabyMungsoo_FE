@@ -1,4 +1,5 @@
 import type { IsoDateTime } from './common';
+import type { Media } from './media';
 
 export const SESSION_STATUSES = ['IN_PROGRESS', 'COMPLETED'] as const;
 export type SessionStatus = (typeof SESSION_STATUSES)[number];
@@ -28,6 +29,8 @@ export interface TriageSession {
   symptomCategory: string;
   status: SessionStatus;
   answers: Answer[];
+  /** 세션 생성 시 mediaIds 로 함께 보낸, 증상 사진들 */
+  media: Media[];
   createdAt: IsoDateTime;
 }
 
@@ -36,6 +39,8 @@ export interface TriageSessionCreateRequest {
   petId: number;
   initialSymptom: string;
   symptomCategory: string;
+  /** 미리 업로드해 둔(POST /media/upload) 사진들의 mediaId. 없으면 생략 가능 */
+  mediaIds?: number[];
 }
 
 /** POST /api/v1/triage/sessions/{sessionId}/answers */

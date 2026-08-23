@@ -18,6 +18,7 @@ export default function HomeScreen() {
   const { data: pets, isPending, error, refetch } = usePets();
   const { selectedPetId, selectPet } = usePetStore();
   const [symptom, setSymptom] = useState('');
+  const [mediaIds, setMediaIds] = useState<number[]>([]);
 
   const createSession = useCreateTriageSession();
   const completeSession = useCompleteTriageSession();
@@ -51,6 +52,7 @@ export default function HomeScreen() {
         petId: selectedPetId,
         initialSymptom,
         symptomCategory: '',
+        mediaIds,
       });
       await completeSession.mutateAsync(session.sessionId);
       router.push(`/analysis/${session.sessionId}`);
@@ -107,7 +109,7 @@ export default function HomeScreen() {
 
           <SymptomInput value={symptom} onChangeText={setSymptom} />
 
-          <MediaUploadGrid />
+          <MediaUploadGrid onMediaIdsChange={setMediaIds} />
 
           <Text
             onPress={isStarting ? undefined : handleStartAnalysis}

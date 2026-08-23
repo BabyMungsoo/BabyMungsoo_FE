@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { mediaApi } from '@/api';
@@ -16,15 +16,27 @@ interface PhotoItem {
   mediaId?: number;
 }
 
+interface MediaUploadGridProps {
+  /** 업로드가 끝난 사진들의 mediaId 목록이 바뀔 때마다 호출됩니다(문진 세션 생성 시 함께 보내기 위함). */
+  onMediaIdsChange?: (mediaIds: number[]) => void;
+}
+
 /**
  * 사진을 고르는 즉시 POST /media/upload 로 올립니다.
  *
- * 백엔드의 MediaFile 에는 petId·sessionId 연결 필드가 없어(독립 기능) 이번 문진과
- * 묶이지는 않지만, 실제로 서버에 저장되는 게 요구사항이라 선택 시점에 바로 업로드합니다.
+ * 아직 문진 세션이 없는 시점에 업로드하므로, 세션에 연결하는 건
+ * "AI 분석 시작하기"를 눌러 세션을 만들 때(POST /triage/sessions 의 mediaIds) 이뤄집니다.
  */
-export function MediaUploadGrid() {
+export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
   const [items, setItems] = useState<PhotoItem[]>([]);
   const remaining = MAX_PHOTOS - items.length;
+
+  useEffect(() => {
+    const uploadedIds = items
+      .filter((item) => item.status === 'uploaded' && item.mediaId != null)
+      .map((item) => item.mediaId!);
+    onMediaIdsChange?.(uploadedIds);
+  }, [items, onMediaIdsChange]);
 
   const uploadOne = async (file: UploadFile) => {
     try {
