@@ -63,6 +63,9 @@ export default function TabLayout() {
       */}
       <Tabs.Screen name="analysis" options={{ href: null }} />
 
+      {/* 5번 건강 가이드/AI 진단 — 탭이 아니라 홈에서 들어오는 화면 (담당: 윤선) */}
+      <Tabs.Screen name="health-guide" options={{ href: null }} />
+
       <Tabs.Screen
         name="my-page"
         options={{
