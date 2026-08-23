@@ -16,7 +16,8 @@ import { ScreenHeader } from '@/components/ui/screen-header';
  * 가이드 콘텐츠 전용 백엔드가 아직 없어 카테고리·인기 가이드는 정적 데이터로 둔다.
  */
 
-type ImageSource = ReturnType<typeof require>;
+// require('*.png')는 Metro 에셋 id(number)를 돌려준다. expo-image의 source가 number를 받는다.
+type ImageSource = number;
 
 type CareCategory = {
   key: string;
