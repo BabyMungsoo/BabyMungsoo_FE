@@ -11,10 +11,14 @@ import type { UploadFile } from '@/types';
 const MAX_PHOTOS = 5;
 
 interface PhotoItem {
+  /** 로컬에서만 쓰는 식별자. localUri 는 같은 사진을 두 번 고르면 중복될 수 있어 식별자로 못 씁니다. */
+  id: string;
   localUri: string;
   status: 'uploading' | 'uploaded' | 'error';
   mediaId?: number;
 }
+
+let nextItemId = 0;
 
 interface MediaUploadGridProps {
   /** 업로드가 끝난 사진들의 mediaId 목록이 바뀔 때마다 호출됩니다(문진 세션 생성 시 함께 보내기 위함). */
@@ -38,19 +42,17 @@ export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
     onMediaIdsChange?.(uploadedIds);
   }, [items, onMediaIdsChange]);
 
-  const uploadOne = async (file: UploadFile) => {
+  const uploadOne = async (id: string, file: UploadFile) => {
     try {
       const media = await mediaApi.upload(file);
       setItems((prev) =>
         prev.map((item) =>
-          item.localUri === file.uri
-            ? { ...item, status: 'uploaded', mediaId: media.mediaId }
-            : item,
+          item.id === id ? { ...item, status: 'uploaded', mediaId: media.mediaId } : item,
         ),
       );
     } catch {
       setItems((prev) =>
-        prev.map((item) => (item.localUri === file.uri ? { ...item, status: 'error' } : item)),
+        prev.map((item) => (item.id === id ? { ...item, status: 'error' } : item)),
       );
     }
   };
@@ -73,21 +75,24 @@ export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
 
     if (result.canceled) return;
 
-    const picked: UploadFile[] = result.assets.slice(0, remaining).map((asset, index) => ({
-      uri: asset.uri,
-      name: asset.fileName ?? `photo-${Date.now()}-${index}.jpg`,
-      type: asset.mimeType ?? 'image/jpeg',
-    }));
+    const picked: (UploadFile & { id: string })[] = result.assets
+      .slice(0, remaining)
+      .map((asset, index) => ({
+        id: String(nextItemId++),
+        uri: asset.uri,
+        name: asset.fileName ?? `photo-${Date.now()}-${index}.jpg`,
+        type: asset.mimeType ?? 'image/jpeg',
+      }));
 
     setItems((prev) => [
       ...prev,
-      ...picked.map((file) => ({ localUri: file.uri, status: 'uploading' as const })),
+      ...picked.map((file) => ({ id: file.id, localUri: file.uri, status: 'uploading' as const })),
     ]);
-    picked.forEach((file) => uploadOne(file));
+    picked.forEach((file) => uploadOne(file.id, file));
   };
 
   const removePhoto = async (item: PhotoItem) => {
-    setItems((prev) => prev.filter((i) => i.localUri !== item.localUri));
+    setItems((prev) => prev.filter((i) => i.id !== item.id));
     if (item.status === 'uploaded' && item.mediaId != null) {
       // 화면에서는 먼저 지우고, 서버 정리는 실패해도 조용히 무시합니다(사용자가 다시 할 수 있는 액션이 없음).
       mediaApi.remove(item.mediaId).catch(() => {});
@@ -108,7 +113,7 @@ export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
             const { item } = slot;
             return (
               <Pressable
-                key={item.localUri}
+                key={item.id}
                 onPress={() => removePhoto(item)}
                 className="h-16 w-16 overflow-hidden rounded-xl"
               >
