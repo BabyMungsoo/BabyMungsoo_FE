@@ -85,6 +85,8 @@ export function KakaoMap({
       onError={() => onError?.()}
       javaScriptEnabled
       domStorageEnabled
+      // 개발 중엔 Safari 웹 인스펙터로 WebView 내부 콘솔·네트워크를 볼 수 있게 켭니다
+      webviewDebuggingEnabled={__DEV__}
       // 지도가 자체적으로 스크롤·확대를 처리하므로 WebView 쪽 스크롤은 끕니다
       scrollEnabled={false}
       bounces={false}
