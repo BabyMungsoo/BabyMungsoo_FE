@@ -11,7 +11,6 @@ import { usePets } from '@/hooks/queries/use-pets';
 import { useCompleteTriageSession, useCreateTriageSession } from '@/hooks/queries/use-triage';
 import { notify } from '@/lib/confirm';
 import { usePetStore } from '@/stores/use-pet-store';
-import type { UploadFile } from '@/types';
 
 /** 1번 — 홈. 반려동물·증상을 받아 문진 세션을 만들고 곧바로 분석 화면(8·4번)으로 넘깁니다. */
 export default function HomeScreen() {
@@ -19,7 +18,6 @@ export default function HomeScreen() {
   const { data: pets, isPending, error, refetch } = usePets();
   const { selectedPetId, selectPet } = usePetStore();
   const [symptom, setSymptom] = useState('');
-  const [photos, setPhotos] = useState<UploadFile[]>([]);
 
   const createSession = useCreateTriageSession();
   const completeSession = useCompleteTriageSession();
@@ -109,7 +107,7 @@ export default function HomeScreen() {
 
           <SymptomInput value={symptom} onChangeText={setSymptom} />
 
-          <MediaUploadGrid photos={photos} onChange={setPhotos} />
+          <MediaUploadGrid />
 
           <Text
             onPress={isStarting ? undefined : handleStartAnalysis}
