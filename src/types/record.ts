@@ -28,6 +28,7 @@ export interface AnalysisRecordCreateRequest {
   emergencyLevel: string;
   suspectedDisease?: string;
   aiGuide?: string;
+  mediaId?: number;
 }
 
 /**
