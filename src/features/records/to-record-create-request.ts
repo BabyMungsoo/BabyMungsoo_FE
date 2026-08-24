@@ -21,12 +21,15 @@ export function toRecordCreateRequest({
   userId,
   dogId,
   symptomText,
+  mediaIds,
 }: {
   result: TriageAnalyzeResult;
   userId: number;
   dogId: number;
   /** 문진 세션의 initialSymptom */
   symptomText: string;
+  /** 세션에 연결된 사진(TriageSession.media)의 mediaId 목록 */
+  mediaIds?: number[];
 }): AnalysisRecordCreateRequest {
   return {
     userId,
@@ -37,5 +40,6 @@ export function toRecordCreateRequest({
     emergencyLevel: result.level,
     suspectedDisease: result.title,
     aiGuide: result.guide,
+    mediaIds,
   };
 }

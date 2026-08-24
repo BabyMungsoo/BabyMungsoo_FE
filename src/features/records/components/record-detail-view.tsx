@@ -6,10 +6,12 @@ import { TRIAGE_LEVEL_META, toTriageLevel } from '@/constants/triage';
 import { formatDateTime } from '@/lib/format';
 import type { AnalysisRecord } from '@/types';
 
+const PHOTO_HEIGHT = 180;
+
 interface RecordDetailViewProps {
   record: AnalysisRecord;
-  /** record.mediaId 로 받아온 media 를 절대 경로로 바꾼 값. 컨테이너(라우트)가 조회해서 넘깁니다 */
-  photoUrl?: string;
+  /** record.mediaIds 로 받아온 media 들을 절대 경로로 바꾼 값. 컨테이너(라우트)가 조회해서 넘깁니다 */
+  photoUrls?: string[];
   onPressEdit: () => void;
   onPressShare: () => void;
   onPressFindHospital: () => void;
@@ -17,7 +19,7 @@ interface RecordDetailViewProps {
 
 /**
  * 7번 — 분석 결과 상세. 서버 호출을 모르는 순수 표현 컴포넌트입니다.
- * (media 조회는 라우트가 하고, 결과만 photoUrl 로 받습니다)
+ * (media 조회는 라우트가 하고, 결과만 photoUrls 로 받습니다)
  *
  * 백엔드 필드 대응 (features/records/to-record-create-request.ts 의 저장 규칙과 짝):
  *   제목        suspectedDisease  ← AI 의 title
@@ -27,7 +29,7 @@ interface RecordDetailViewProps {
  */
 export function RecordDetailView({
   record,
-  photoUrl,
+  photoUrls = [],
   onPressEdit,
   onPressShare,
   onPressFindHospital,
@@ -53,16 +55,35 @@ export function RecordDetailView({
           elevation: 1,
         }}
       >
-        {!!photoUrl && (
+        {photoUrls.length === 1 && (
           <Image
-            source={{ uri: photoUrl }}
-            style={{ height: 180, width: '100%', borderRadius: 16 }}
+            source={{ uri: photoUrls[0] }}
+            style={{ height: PHOTO_HEIGHT, width: '100%', borderRadius: 16 }}
             contentFit="cover"
             transition={150}
           />
         )}
 
-        <View className={`flex-row items-center gap-2 ${photoUrl ? 'mt-4' : ''}`}>
+        {photoUrls.length > 1 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="gap-2"
+          >
+            {photoUrls.map((uri, index) => (
+              <Image
+                key={uri}
+                source={{ uri }}
+                accessibilityLabel={`첨부 사진 ${index + 1}`}
+                style={{ height: PHOTO_HEIGHT, width: PHOTO_HEIGHT, borderRadius: 16 }}
+                contentFit="cover"
+                transition={150}
+              />
+            ))}
+          </ScrollView>
+        )}
+
+        <View className={`flex-row items-center gap-2 ${photoUrls.length > 0 ? 'mt-4' : ''}`}>
           {level && <TriageBadge level={level} />}
           <Text className="flex-1 text-lg font-bold text-ink">{title}</Text>
         </View>
