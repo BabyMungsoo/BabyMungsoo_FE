@@ -21,6 +21,7 @@ export const queryKeys = {
       ['triage', 'questions', symptomCategory ?? null] as const,
     session: (sessionId: number) => ['triage', 'session', sessionId] as const,
     nextQuestion: (sessionId: number) => ['triage', 'session', sessionId, 'next-question'] as const,
+    analysis: (sessionId: number) => ['triage', 'analysis', sessionId] as const,
   },
   media: {
     all: ['media'] as const,

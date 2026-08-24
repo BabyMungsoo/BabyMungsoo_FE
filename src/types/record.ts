@@ -12,6 +12,11 @@ export interface AnalysisRecord {
   suspectedDisease: string | null;
   aiGuide: string | null;
   createdAt: IsoDateTime;
+  /**
+   * 분석에 쓴 사진들의 media ID 목록(최대 5장). useMedia(mediaId) 로 각각의
+   * media 상세를 받아 fileUrl 을 `toAbsoluteUrl()` 로 감싸면 화면에 쓸 수 있습니다.
+   */
+  mediaIds?: number[] | null;
 }
 
 /** POST /api/v1/records */
@@ -23,4 +28,18 @@ export interface AnalysisRecordCreateRequest {
   emergencyLevel: string;
   suspectedDisease?: string;
   aiGuide?: string;
+  /** 최대 5장 */
+  mediaIds?: number[];
+}
+
+/**
+ * PATCH /api/v1/records/{recordId} — 보낸 필드만 수정됩니다.
+ *
+ * aiResult/aiGuide 는 AI 가 만든 값이라 사용자가 고치지 않습니다.
+ * 사용자가 직접 입력했거나 정정할 수 있는 값만 열어 둡니다.
+ */
+export interface AnalysisRecordUpdateRequest {
+  symptomText?: string;
+  emergencyLevel?: string;
+  suspectedDisease?: string | null;
 }

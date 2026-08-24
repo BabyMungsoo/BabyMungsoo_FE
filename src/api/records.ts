@@ -1,4 +1,8 @@
-import type { AnalysisRecord, AnalysisRecordCreateRequest } from '@/types';
+import type {
+  AnalysisRecord,
+  AnalysisRecordCreateRequest,
+  AnalysisRecordUpdateRequest,
+} from '@/types';
 
 import { api } from './client';
 
@@ -18,6 +22,12 @@ export const recordsApi = {
   /** POST /records */
   create: async (body: AnalysisRecordCreateRequest) => {
     const { data } = await api.post<AnalysisRecord>('/records', body);
+    return data;
+  },
+
+  /** PATCH /records/{recordId} — 보낸 필드만 수정 */
+  update: async (recordId: number, body: AnalysisRecordUpdateRequest) => {
+    const { data } = await api.patch<AnalysisRecord>(`/records/${recordId}`, body);
     return data;
   },
 

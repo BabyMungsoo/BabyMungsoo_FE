@@ -24,6 +24,7 @@ export default function RootLayout() {
               <Stack.Screen name="find-id" />
               <Stack.Screen name="find-password" />
               <Stack.Screen name="api-test" />
+              <Stack.Screen name="(tabs)" />
             </Stack>
           </View>
         </View>
