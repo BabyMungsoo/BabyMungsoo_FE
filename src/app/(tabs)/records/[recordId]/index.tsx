@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { toAbsoluteUrl } from '@/api';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { RecordDetailView } from '@/features/records/components/record-detail-view';
-import { useMedia } from '@/hooks/queries/use-media';
+import { useMediaList } from '@/hooks/queries/use-media';
 import { useDeleteRecord, useRecord } from '@/hooks/queries/use-records';
 import { confirm } from '@/lib/confirm';
 
@@ -20,8 +20,12 @@ export default function RecordDetailScreen() {
   const { data: record, isPending, error, refetch } = useRecord(validId);
   const deleteRecord = useDeleteRecord();
 
-  const media = useMedia(record?.mediaId);
-  const photoUrl = media.data ? toAbsoluteUrl(media.data.fileUrl) : undefined;
+  const mediaQueries = useMediaList(record?.mediaIds);
+  const photoUrls = mediaQueries
+    .map((query) => query.data)
+    .filter((media) => media != null)
+    .map((media) => toAbsoluteUrl(media.fileUrl))
+    .filter((url) => url != null);
 
   async function handleDelete() {
     if (validId == null) return;
@@ -93,7 +97,7 @@ export default function RecordDetailScreen() {
       {record && (
         <RecordDetailView
           record={record}
-          photoUrl={photoUrl}
+          photoUrls={photoUrls}
           onPressEdit={() => router.push(`/records/${record.recordId}/edit`)}
           // TODO: 리포트 생성(POST /reports)은 hospitalId 가 필요해서 9번에서 병원을 고른 뒤에 붙입니다
           onPressShare={() => {}}

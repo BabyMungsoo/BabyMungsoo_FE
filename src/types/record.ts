@@ -13,10 +13,10 @@ export interface AnalysisRecord {
   aiGuide: string | null;
   createdAt: IsoDateTime;
   /**
-   * 분석에 쓴 사진의 media ID. useMedia(mediaId) 로 media 상세를 받아
-   * fileUrl 을 `toAbsoluteUrl()` 로 감싸면 화면에 쓸 수 있습니다.
+   * 분석에 쓴 사진들의 media ID 목록(최대 5장). useMedia(mediaId) 로 각각의
+   * media 상세를 받아 fileUrl 을 `toAbsoluteUrl()` 로 감싸면 화면에 쓸 수 있습니다.
    */
-  mediaId?: number | null;
+  mediaIds?: number[] | null;
 }
 
 /** POST /api/v1/records */
@@ -28,7 +28,8 @@ export interface AnalysisRecordCreateRequest {
   emergencyLevel: string;
   suspectedDisease?: string;
   aiGuide?: string;
-  mediaId?: number;
+  /** 최대 5장 */
+  mediaIds?: number[];
 }
 
 /**

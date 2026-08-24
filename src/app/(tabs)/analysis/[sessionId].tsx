@@ -65,7 +65,7 @@ export default function AnalysisScreen() {
         userId,
         dogId: sessionData.petId,
         symptomText: sessionData.initialSymptom,
-        mediaId: sessionData.media[0]?.mediaId,
+        mediaIds: sessionData.media.map((media) => media.mediaId),
       }),
     );
   }, [result, session.data, userId, validId, createRecord]);
