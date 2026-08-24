@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import AppInput from '@/components/common/AppInput';
 import PrimaryButton from '@/components/common/PrimaryButton';
@@ -16,6 +17,7 @@ export default function PetInfoScreen() {
   const [weight, setWeight] = useState('');
   const [notes, setNotes] = useState('');
   const [image, setImage] = useState<string | null>(null);
+  
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -44,6 +46,7 @@ export default function PetInfoScreen() {
     console.log('강아지 정보 저장:', petData);
 
     // TODO: 나중에 여기서 Pet 등록 API 연결
+    router.replace('/(tabs)');
   };
 
   return (
@@ -71,7 +74,7 @@ export default function PetInfoScreen() {
           >
             <Image
               source={require('../../assets/images/icons/camera.png')}
-              style={{ width: 44, height: 44 }}
+              style={{ width: 25, height: 25 }}
               resizeMode="contain"
             />
           </Pressable>
