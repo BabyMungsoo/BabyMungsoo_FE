@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { toAbsoluteUrl } from '@/api';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { AnalyzingView } from '@/features/analysis/components/analyzing-view';
 import { ResultView, type QuickGuideKey } from '@/features/analysis/components/result-view';
@@ -34,6 +35,13 @@ export default function AnalysisScreen() {
 
   const result = analysis.data;
   const initialSymptom = session.data?.initialSymptom;
+
+  // 홈에서 첨부한 사진은 세션 응답에 함께 들어옵니다(media). 분석기록(7번)처럼
+  // mediaId 로 다시 조회할 필요가 없어, 상대 경로만 절대 URL 로 바꿔 넘깁니다.
+  const photoUrls = (session.data?.media ?? [])
+    .map((media) => toAbsoluteUrl(media.fileUrl))
+    .filter((url) => url != null);
+
   const isReady = result != null && initialSymptom != null;
   const error = analysis.error ?? session.error;
 
@@ -103,6 +111,7 @@ export default function AnalysisScreen() {
       <ResultView
         result={result}
         initialSymptom={initialSymptom}
+        photoUrls={photoUrls}
         // 증상부터 다시 입력해야 새 세션이 만들어지므로 홈으로 보냅니다.
         onPressRetry={() => router.replace('/')}
         onPressQuickGuide={handleQuickGuide}
