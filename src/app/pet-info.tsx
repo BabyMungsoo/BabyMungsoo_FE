@@ -1,14 +1,7 @@
 // 강아지 정보
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AppInput from '@/components/common/AppInput';
@@ -66,11 +59,7 @@ export default function PetInfoScreen() {
         <View className="my-6 items-center">
           <View className="h-32 w-32 overflow-hidden rounded-full bg-gray-100">
             {image && (
-              <Image
-                source={{ uri: image }}
-                className="h-full w-full"
-                resizeMode="cover"
-              />
+              <Image source={{ uri: image }} className="h-full w-full" resizeMode="cover" />
             )}
           </View>
 
@@ -118,24 +107,18 @@ export default function PetInfoScreen() {
             </View>
 
             <View className="flex-1 gap-2">
-              <Text className="text-sm font-semibold text-gray-700">
-                성별
-              </Text>
+              <Text className="text-sm font-semibold text-gray-700">성별</Text>
 
               <View className="flex-row gap-2">
                 <Pressable
                   onPress={() => setGender('MALE')}
                   className={`h-14 flex-1 items-center justify-center rounded-xl border ${
-                    gender === 'MALE'
-                      ? 'border-[#FFD83D] bg-[#FFF8D7]'
-                      : 'border-gray-300 bg-white'
+                    gender === 'MALE' ? 'border-[#FFD83D] bg-[#FFF8D7]' : 'border-gray-300 bg-white'
                   }`}
                 >
                   <Text
                     className={`text-sm font-semibold ${
-                      gender === 'MALE'
-                        ? 'text-[#C89A00]'
-                        : 'text-gray-500'
+                      gender === 'MALE' ? 'text-[#C89A00]' : 'text-gray-500'
                     }`}
                   >
                     남아
@@ -152,9 +135,7 @@ export default function PetInfoScreen() {
                 >
                   <Text
                     className={`text-sm font-semibold ${
-                      gender === 'FEMALE'
-                        ? 'text-[#C89A00]'
-                        : 'text-gray-500'
+                      gender === 'FEMALE' ? 'text-[#C89A00]' : 'text-gray-500'
                     }`}
                   >
                     여아
@@ -175,9 +156,7 @@ export default function PetInfoScreen() {
 
           {/* 특이사항 */}
           <View className="gap-2">
-            <Text className="text-sm font-semibold text-gray-700">
-              특이사항 (선택)
-            </Text>
+            <Text className="text-sm font-semibold text-gray-700">특이사항 (선택)</Text>
 
             <TextInput
               placeholder="알러지, 복용 중인 약 등"
@@ -192,10 +171,7 @@ export default function PetInfoScreen() {
 
           {/* 저장 버튼 */}
           <View className="mt-5">
-            <PrimaryButton
-              title="저장하기"
-              onPress={handleSave}
-            />
+            <PrimaryButton title="저장하기" onPress={handleSave} />
           </View>
         </View>
       </ScrollView>

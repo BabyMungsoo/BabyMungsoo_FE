@@ -5,9 +5,7 @@ interface ScreenHeaderProps {
   title: string;
 }
 
-export default function ScreenHeader({
-  title,
-}: ScreenHeaderProps) {
+export default function ScreenHeader({ title }: ScreenHeaderProps) {
   return (
     <View className="relative h-14 w-full flex-row items-center justify-center">
       <Pressable
@@ -17,9 +15,7 @@ export default function ScreenHeader({
         <Text className="text-3xl text-gray-800">‹</Text>
       </Pressable>
 
-      <Text className="text-xl font-bold text-gray-900">
-        {title}
-      </Text>
+      <Text className="text-xl font-bold text-gray-900">{title}</Text>
     </View>
   );
 }

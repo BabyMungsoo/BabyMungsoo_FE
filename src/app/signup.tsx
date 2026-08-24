@@ -9,9 +9,7 @@ export default function SignupScreen() {
     <SafeAreaView className="flex-1 bg-white px-6">
       <ScreenHeader title="회원가입" />
 
-      <Text className="mt-10 text-center text-gray-400">
-        회원가입 화면 구현 예정
-      </Text>
+      <Text className="mt-10 text-center text-gray-400">회원가입 화면 구현 예정</Text>
     </SafeAreaView>
   );
 }
