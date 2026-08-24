@@ -1,7 +1,27 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { triageApi } from '@/api';
 import { queryKeys } from '@/lib/query-keys';
+import type { TriageSessionCreateRequest } from '@/types';
+
+/** POST /triage/sessions — 문진 세션 시작 */
+export function useCreateTriageSession() {
+  return useMutation({
+    mutationFn: (body: TriageSessionCreateRequest) => triageApi.createSession(body),
+  });
+}
+
+/**
+ * POST /triage/sessions/{sessionId}/complete
+ *
+ * 홈 화면은 카테고리별 추가 질문 없이 초기 증상만으로 바로 분석을 시작하므로,
+ * 세션을 만들자마자 곧바로 완료 처리합니다(symptomCategory 없이 completeSession 호출 가능).
+ */
+export function useCompleteTriageSession() {
+  return useMutation({
+    mutationFn: (sessionId: number) => triageApi.completeSession(sessionId),
+  });
+}
 
 /**
  * GET /triage/sessions/{sessionId}
