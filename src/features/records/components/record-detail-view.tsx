@@ -1,7 +1,6 @@
 import { Image } from 'expo-image';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { toAbsoluteUrl } from '@/api';
 import { TriageBadge } from '@/components/ui/triage-badge';
 import { TRIAGE_LEVEL_META, toTriageLevel } from '@/constants/triage';
 import { formatDateTime } from '@/lib/format';
@@ -9,6 +8,8 @@ import type { AnalysisRecord } from '@/types';
 
 interface RecordDetailViewProps {
   record: AnalysisRecord;
+  /** record.mediaId 로 받아온 media 를 절대 경로로 바꾼 값. 컨테이너(라우트)가 조회해서 넘깁니다 */
+  photoUrl?: string;
   onPressEdit: () => void;
   onPressShare: () => void;
   onPressFindHospital: () => void;
@@ -16,18 +17,17 @@ interface RecordDetailViewProps {
 
 /**
  * 7번 — 분석 결과 상세. 서버 호출을 모르는 순수 표현 컴포넌트입니다.
+ * (media 조회는 라우트가 하고, 결과만 photoUrl 로 받습니다)
  *
  * 백엔드 필드 대응 (features/records/to-record-create-request.ts 의 저장 규칙과 짝):
  *   제목        suspectedDisease  ← AI 의 title
  *   주요 증상   symptomText 를 쉼표로 분리
  *   AI 분석 요약 aiResult          ← AI 의 reason 배열을 합친 것
  *   권장 조치   aiGuide 를 줄바꿈으로 분리  ← AI 의 guide
- *
- * 사진(photoUrl)은 record ↔ media 연결 필드가 백엔드에 아직 없어 항상 비어 있습니다.
- * 값이 있을 때만 그리므로, 나중에 채워지면 코드 수정 없이 나타납니다.
  */
 export function RecordDetailView({
   record,
+  photoUrl,
   onPressEdit,
   onPressShare,
   onPressFindHospital,
@@ -53,16 +53,16 @@ export function RecordDetailView({
           elevation: 1,
         }}
       >
-        {!!record.photoUrl && (
+        {!!photoUrl && (
           <Image
-            source={{ uri: toAbsoluteUrl(record.photoUrl) }}
+            source={{ uri: photoUrl }}
             style={{ height: 180, width: '100%', borderRadius: 16 }}
             contentFit="cover"
             transition={150}
           />
         )}
 
-        <View className={`flex-row items-center gap-2 ${record.photoUrl ? 'mt-4' : ''}`}>
+        <View className={`flex-row items-center gap-2 ${photoUrl ? 'mt-4' : ''}`}>
           {level && <TriageBadge level={level} />}
           <Text className="flex-1 text-lg font-bold text-ink">{title}</Text>
         </View>

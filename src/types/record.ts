@@ -13,11 +13,10 @@ export interface AnalysisRecord {
   aiGuide: string | null;
   createdAt: IsoDateTime;
   /**
-   * 분석에 쓴 사진 (media 도메인, `toAbsoluteUrl()` 로 감싸 써야 하는 상대 경로).
-   * record ↔ media 를 이어주는 필드가 백엔드에 아직 없어서 응답에 아예 안 옵니다.
-   * 나중에 필드가 생기면 옵셔널을 그대로 두어도 값이 채워지는 대로 나타납니다.
+   * 분석에 쓴 사진의 media ID. useMedia(mediaId) 로 media 상세를 받아
+   * fileUrl 을 `toAbsoluteUrl()` 로 감싸면 화면에 쓸 수 있습니다.
    */
-  photoUrl?: string | null;
+  mediaId?: number | null;
 }
 
 /** POST /api/v1/records */
