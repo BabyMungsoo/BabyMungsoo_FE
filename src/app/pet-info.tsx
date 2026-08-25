@@ -17,7 +17,6 @@ export default function PetInfoScreen() {
   const [weight, setWeight] = useState('');
   const [notes, setNotes] = useState('');
   const [image, setImage] = useState<string | null>(null);
-  
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
