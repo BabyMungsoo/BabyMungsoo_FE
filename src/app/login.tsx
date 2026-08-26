@@ -1,14 +1,87 @@
 // 로그인
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { petsApi, setAuthToken } from '@/api';
 import AppInput from '@/components/common/AppInput';
 import PrimaryButton from '@/components/common/PrimaryButton';
+import { useLogin } from '@/hooks/queries/use-auth';
+import { useSessionStore } from '@/stores/use-session-store';
+
 export default function LoginScreen() {
   const [rememberLogin, setRememberLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  const loginMutation = useLogin();
+  const setSession = useSessionStore((state) => state.setSession);
+
+  const handleLogin = async () => {
+  setLoginError('');
+
+  if (!email.trim() || !password) {
+    setLoginError('이메일과 비밀번호를 입력해주세요.');
+    return;
+  }
+
+  try {
+    const result = await loginMutation.mutateAsync({
+      email: email.trim(),
+      password,
+    });
+
+    setAuthToken(result.accessToken);
+
+    setSession({
+      userId: result.userId,
+      accessToken: result.accessToken,
+      email: result.email,
+      name: result.name,
+    });
+
+    if (rememberLogin) {
+      await AsyncStorage.setItem(
+        'accessToken',
+        result.accessToken,
+      );
+      await AsyncStorage.setItem(
+        'userId',
+        String(result.userId),
+      );
+      await AsyncStorage.setItem(
+        'email',
+        result.email,
+      );
+      await AsyncStorage.setItem(
+        'name',
+        result.name,
+      );
+    } else {
+      await AsyncStorage.multiRemove([
+        'accessToken',
+        'userId',
+        'email',
+        'name',
+      ]);
+    }
+
+    // 펫 존재 여부와 상관없이 로그인 성공 후 홈으로 이동
+    router.replace('/(tabs)' as never);
+  } catch (error) {
+    setLoginError(
+      error instanceof Error
+        ? error.message
+        : '로그인에 실패했습니다.',
+    );
+  }
+};
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>
@@ -38,12 +111,20 @@ export default function LoginScreen() {
           </Text>
 
           <View className="mt-8 gap-4">
-            <AppInput placeholder="이메일 또는 아이디" autoCapitalize="none" autoCorrect={false} />
-
+            <AppInput
+              placeholder="이메일"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+            />
             {/* 비밀번호 입력창 */}
             <View className="relative">
               <AppInput
                 placeholder="비밀번호"
+                value={password}
+                onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -81,7 +162,10 @@ export default function LoginScreen() {
           </Pressable>
 
           <View className="mt-8">
-            <PrimaryButton title="로그인" onPress={() => router.push('/pet-info')} />
+            <PrimaryButton
+              title={loginMutation.isPending ? '로그인 중...' : '로그인'}
+              onPress={handleLogin}
+            />
           </View>
 
           <View className="mt-6 flex-row items-center justify-center">
