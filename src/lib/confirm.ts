@@ -37,3 +37,15 @@ export function confirm({
     ]);
   });
 }
+
+/** 버튼 하나짜리 안내 다이얼로그. confirm() 과 같은 이유로 웹에서는 window.alert 를 씁니다. */
+export function notify(title: string, message?: string): Promise<void> {
+  if (Platform.OS === 'web') {
+    window.alert(message ? `${title}\n\n${message}` : title);
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    Alert.alert(title, message, [{ text: '확인', onPress: () => resolve() }]);
+  });
+}

@@ -36,6 +36,7 @@ export function RecordListView({
       <TriageFilter value={filter} onChange={onChangeFilter} />
 
       <FlatList
+        className="flex-1"
         data={records}
         keyExtractor={(record) => String(record.recordId)}
         renderItem={({ item }) => <RecordCard record={item} onPress={onPressRecord} />}
