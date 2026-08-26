@@ -24,64 +24,43 @@ export default function LoginScreen() {
   const setSession = useSessionStore((state) => state.setSession);
 
   const handleLogin = async () => {
-  setLoginError('');
+    setLoginError('');
 
-  if (!email.trim() || !password) {
-    setLoginError('이메일과 비밀번호를 입력해주세요.');
-    return;
-  }
-
-  try {
-    const result = await loginMutation.mutateAsync({
-      email: email.trim(),
-      password,
-    });
-
-    setAuthToken(result.accessToken);
-
-    setSession({
-      userId: result.userId,
-      accessToken: result.accessToken,
-      email: result.email,
-      name: result.name,
-    });
-
-    if (rememberLogin) {
-      await AsyncStorage.setItem(
-        'accessToken',
-        result.accessToken,
-      );
-      await AsyncStorage.setItem(
-        'userId',
-        String(result.userId),
-      );
-      await AsyncStorage.setItem(
-        'email',
-        result.email,
-      );
-      await AsyncStorage.setItem(
-        'name',
-        result.name,
-      );
-    } else {
-      await AsyncStorage.multiRemove([
-        'accessToken',
-        'userId',
-        'email',
-        'name',
-      ]);
+    if (!email.trim() || !password) {
+      setLoginError('이메일과 비밀번호를 입력해주세요.');
+      return;
     }
 
-    // 펫 존재 여부와 상관없이 로그인 성공 후 홈으로 이동
-    router.replace('/(tabs)' as never);
-  } catch (error) {
-    setLoginError(
-      error instanceof Error
-        ? error.message
-        : '로그인에 실패했습니다.',
-    );
-  }
-};
+    try {
+      const result = await loginMutation.mutateAsync({
+        email: email.trim(),
+        password,
+      });
+
+      setAuthToken(result.accessToken);
+
+      setSession({
+        userId: result.userId,
+        accessToken: result.accessToken,
+        email: result.email,
+        name: result.name,
+      });
+
+      if (rememberLogin) {
+        await AsyncStorage.setItem('accessToken', result.accessToken);
+        await AsyncStorage.setItem('userId', String(result.userId));
+        await AsyncStorage.setItem('email', result.email);
+        await AsyncStorage.setItem('name', result.name);
+      } else {
+        await AsyncStorage.multiRemove(['accessToken', 'userId', 'email', 'name']);
+      }
+
+      // 펫 존재 여부와 상관없이 로그인 성공 후 홈으로 이동
+      router.replace('/(tabs)' as never);
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : '로그인에 실패했습니다.');
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['bottom']}>

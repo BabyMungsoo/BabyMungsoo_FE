@@ -1,17 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
-import {
-  router,
-  useLocalSearchParams,
-} from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { authApi, mediaApi, setAuthToken } from '@/api';
@@ -27,24 +17,18 @@ export default function PetInfoScreen() {
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
   const [age, setAge] = useState('');
-  const [gender, setGender] =
-    useState<'MALE' | 'FEMALE'>('MALE');
+  const [gender, setGender] = useState<'MALE' | 'FEMALE'>('MALE');
   const [weight, setWeight] = useState('');
   const [notes, setNotes] = useState('');
-  const [isNeutered, setIsNeutered] =
-    useState(false);
+  const [isNeutered, setIsNeutered] = useState(false);
 
   // 프로필 이미지
-  const [image, setImage] =
-    useState<string | null>(null);
-  const [imageFileName, setImageFileName] =
-    useState<string | null>(null);
-  const [imageMimeType, setImageMimeType] =
-    useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null);
+  const [imageFileName, setImageFileName] = useState<string | null>(null);
+  const [imageMimeType, setImageMimeType] = useState<string | null>(null);
 
   // 에러 메시지
-  const [errorMessage, setErrorMessage] =
-    useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // mode=add이면 이미 가입된 사용자의 펫 추가
   const { mode } = useLocalSearchParams<{
@@ -54,17 +38,11 @@ export default function PetInfoScreen() {
   const isAddMode = mode === 'add';
 
   // 최초 회원가입 때만 사용하는 임시 회원 정보
-  const signupDraft = useSignupStore(
-    (state) => state.signupDraft,
-  );
+  const signupDraft = useSignupStore((state) => state.signupDraft);
 
-  const clearSignupDraft = useSignupStore(
-    (state) => state.clearSignupDraft,
-  );
+  const clearSignupDraft = useSignupStore((state) => state.clearSignupDraft);
 
-  const setSession = useSessionStore(
-    (state) => state.setSession,
-  );
+  const setSession = useSessionStore((state) => state.setSession);
 
   const createPetMutation = useCreatePet();
 
@@ -74,13 +52,12 @@ export default function PetInfoScreen() {
   const pickImage = async () => {
     setErrorMessage('');
 
-    const result =
-      await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
 
     if (result.canceled) {
       return;
@@ -88,39 +65,21 @@ export default function PetInfoScreen() {
 
     const asset = result.assets[0];
 
-    const allowedTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-    ];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
-    if (
-      asset.mimeType &&
-      !allowedTypes.includes(asset.mimeType)
-    ) {
-      setErrorMessage(
-        'JPG, PNG, GIF 이미지만 업로드할 수 있습니다.',
-      );
+    if (asset.mimeType && !allowedTypes.includes(asset.mimeType)) {
+      setErrorMessage('JPG, PNG, GIF 이미지만 업로드할 수 있습니다.');
       return;
     }
 
-    if (
-      asset.fileSize &&
-      asset.fileSize > 7 * 1024 * 1024
-    ) {
-      setErrorMessage(
-        '이미지는 7MB 이하만 업로드할 수 있습니다.',
-      );
+    if (asset.fileSize && asset.fileSize > 7 * 1024 * 1024) {
+      setErrorMessage('이미지는 7MB 이하만 업로드할 수 있습니다.');
       return;
     }
 
     setImage(asset.uri);
-    setImageFileName(
-      asset.fileName ?? 'pet-profile.jpg',
-    );
-    setImageMimeType(
-      asset.mimeType ?? 'image/jpeg',
-    );
+    setImageFileName(asset.fileName ?? 'pet-profile.jpg');
+    setImageMimeType(asset.mimeType ?? 'image/jpeg');
   };
 
   /**
@@ -139,51 +98,31 @@ export default function PetInfoScreen() {
 
     // 입력값 검증
     if (!name.trim()) {
-      setErrorMessage(
-        '강아지 이름을 입력해주세요.',
-      );
+      setErrorMessage('강아지 이름을 입력해주세요.');
       return;
     }
 
     if (!breed.trim()) {
-      setErrorMessage(
-        '품종을 입력해주세요.',
-      );
+      setErrorMessage('품종을 입력해주세요.');
       return;
     }
 
     if (!age.trim()) {
-      setErrorMessage(
-        '나이를 입력해주세요.',
-      );
+      setErrorMessage('나이를 입력해주세요.');
       return;
     }
 
     const parsedAge = Number(age);
 
-    if (
-      !Number.isFinite(parsedAge) ||
-      parsedAge < 0
-    ) {
-      setErrorMessage(
-        '올바른 나이를 입력해주세요.',
-      );
+    if (!Number.isFinite(parsedAge) || parsedAge < 0) {
+      setErrorMessage('올바른 나이를 입력해주세요.');
       return;
     }
 
-    const parsedWeight =
-      weight.trim() === ''
-        ? undefined
-        : Number(weight);
+    const parsedWeight = weight.trim() === '' ? undefined : Number(weight);
 
-    if (
-      parsedWeight !== undefined &&
-      (!Number.isFinite(parsedWeight) ||
-        parsedWeight <= 0)
-    ) {
-      setErrorMessage(
-        '올바른 체중을 입력해주세요.',
-      );
+    if (parsedWeight !== undefined && (!Number.isFinite(parsedWeight) || parsedWeight <= 0)) {
+      setErrorMessage('올바른 체중을 입력해주세요.');
       return;
     }
 
@@ -198,24 +137,16 @@ export default function PetInfoScreen() {
        */
 
       if (isAddMode) {
-        let profileImage:
-          | string
-          | undefined;
+        let profileImage: string | undefined;
 
         if (image) {
-          const uploadedMedia =
-            await mediaApi.upload({
-              uri: image,
-              name:
-                imageFileName ??
-                'pet-profile.jpg',
-              type:
-                imageMimeType ??
-                'image/jpeg',
-            });
+          const uploadedMedia = await mediaApi.upload({
+            uri: image,
+            name: imageFileName ?? 'pet-profile.jpg',
+            type: imageMimeType ?? 'image/jpeg',
+          });
 
-          profileImage =
-            uploadedMedia.fileUrl;
+          profileImage = uploadedMedia.fileUrl;
         }
 
         await createPetMutation.mutateAsync({
@@ -225,15 +156,12 @@ export default function PetInfoScreen() {
           gender,
           weight: parsedWeight,
           isNeutered,
-          underlyingDisease:
-            notes.trim() || undefined,
+          underlyingDisease: notes.trim() || undefined,
           profileImage,
         });
 
         // 기존 회원의 펫 추가 완료
-        router.replace(
-          '/my-info' as never,
-        );
+        router.replace('/my-info' as never);
 
         return;
       }
@@ -245,9 +173,7 @@ export default function PetInfoScreen() {
        */
 
       if (!signupDraft) {
-        setErrorMessage(
-          '회원가입 정보가 없습니다. 회원가입부터 다시 진행해주세요.',
-        );
+        setErrorMessage('회원가입 정보가 없습니다. 회원가입부터 다시 진행해주세요.');
 
         router.replace('/signup');
 
@@ -257,35 +183,26 @@ export default function PetInfoScreen() {
       // 1. 회원 계정 생성
       await authApi.signup({
         email: signupDraft.email,
-        password:
-          signupDraft.password,
+        password: signupDraft.password,
         name: signupDraft.name,
         phone: signupDraft.phone,
       });
 
       // 2. 생성한 계정으로 자동 로그인
-      const loginResult =
-        await authApi.login({
-          email: signupDraft.email,
-          password:
-            signupDraft.password,
-        });
+      const loginResult = await authApi.login({
+        email: signupDraft.email,
+        password: signupDraft.password,
+      });
 
       // 3. Axios에 JWT 등록
-      setAuthToken(
-        loginResult.accessToken,
-      );
+      setAuthToken(loginResult.accessToken);
 
       // 4. 전역 로그인 세션 저장
       setSession({
-        userId:
-          loginResult.userId,
-        accessToken:
-          loginResult.accessToken,
-        email:
-          loginResult.email,
-        name:
-          loginResult.name,
+        userId: loginResult.userId,
+        accessToken: loginResult.accessToken,
+        email: loginResult.email,
+        name: loginResult.name,
       });
 
       /**
@@ -293,25 +210,17 @@ export default function PetInfoScreen() {
        * 인증이 필요한 media/pets API 호출 가능
        */
 
-      let profileImage:
-        | string
-        | undefined;
+      let profileImage: string | undefined;
 
       // 5. 이미지가 있으면 업로드
       if (image) {
-        const uploadedMedia =
-          await mediaApi.upload({
-            uri: image,
-            name:
-              imageFileName ??
-              'pet-profile.jpg',
-            type:
-              imageMimeType ??
-              'image/jpeg',
-          });
+        const uploadedMedia = await mediaApi.upload({
+          uri: image,
+          name: imageFileName ?? 'pet-profile.jpg',
+          type: imageMimeType ?? 'image/jpeg',
+        });
 
-        profileImage =
-          uploadedMedia.fileUrl;
+        profileImage = uploadedMedia.fileUrl;
       }
 
       // 6. 최초 반려동물 등록
@@ -322,8 +231,7 @@ export default function PetInfoScreen() {
         gender,
         weight: parsedWeight,
         isNeutered,
-        underlyingDisease:
-          notes.trim() || undefined,
+        underlyingDisease: notes.trim() || undefined,
         profileImage,
       });
 
@@ -331,16 +239,9 @@ export default function PetInfoScreen() {
       clearSignupDraft();
 
       // 8. 홈으로 이동
-      router.replace(
-        '/(tabs)' as never,
-      );
+      router.replace('/(tabs)' as never);
     } catch (error) {
-      console.error(
-        isAddMode
-          ? '반려동물 등록 실패:'
-          : '회원가입 실패:',
-        error,
-      );
+      console.error(isAddMode ? '반려동물 등록 실패:' : '회원가입 실패:', error);
 
       setErrorMessage(
         error instanceof Error
@@ -360,28 +261,16 @@ export default function PetInfoScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* 모드에 따라 제목 변경 */}
-        <ScreenHeader
-          title={
-            isAddMode
-              ? '반려동물 등록'
-              : '강아지 정보'
-          }
-        />
+        <ScreenHeader title={isAddMode ? '반려동물 등록' : '강아지 정보'} />
 
         {/* 프로필 이미지 */}
         <View className="my-6 items-center">
           <View className="h-32 w-32 overflow-hidden rounded-full bg-gray-100">
             {image ? (
-              <Image
-                source={{ uri: image }}
-                className="h-full w-full"
-                resizeMode="cover"
-              />
+              <Image source={{ uri: image }} className="h-full w-full" resizeMode="cover" />
             ) : (
               <View className="h-full w-full items-center justify-center">
-                <Text className="text-sm text-gray-400">
-                  사진
-                </Text>
+                <Text className="text-sm text-gray-400">사진</Text>
               </View>
             )}
           </View>
@@ -433,27 +322,19 @@ export default function PetInfoScreen() {
             </View>
 
             <View className="flex-1 gap-2">
-              <Text className="text-sm font-semibold text-gray-700">
-                성별
-              </Text>
+              <Text className="text-sm font-semibold text-gray-700">성별</Text>
 
               <View className="flex-row gap-2">
                 {/* 남아 */}
                 <Pressable
-                  onPress={() =>
-                    setGender('MALE')
-                  }
+                  onPress={() => setGender('MALE')}
                   className={`h-14 flex-1 items-center justify-center rounded-xl border ${
-                    gender === 'MALE'
-                      ? 'border-[#FFD83D] bg-[#FFF8D7]'
-                      : 'border-gray-300 bg-white'
+                    gender === 'MALE' ? 'border-[#FFD83D] bg-[#FFF8D7]' : 'border-gray-300 bg-white'
                   }`}
                 >
                   <Text
                     className={`text-sm font-semibold ${
-                      gender === 'MALE'
-                        ? 'text-[#C89A00]'
-                        : 'text-gray-500'
+                      gender === 'MALE' ? 'text-[#C89A00]' : 'text-gray-500'
                     }`}
                   >
                     남아
@@ -462,9 +343,7 @@ export default function PetInfoScreen() {
 
                 {/* 여아 */}
                 <Pressable
-                  onPress={() =>
-                    setGender('FEMALE')
-                  }
+                  onPress={() => setGender('FEMALE')}
                   className={`h-14 flex-1 items-center justify-center rounded-xl border ${
                     gender === 'FEMALE'
                       ? 'border-[#FFD83D] bg-[#FFF8D7]'
@@ -473,9 +352,7 @@ export default function PetInfoScreen() {
                 >
                   <Text
                     className={`text-sm font-semibold ${
-                      gender === 'FEMALE'
-                        ? 'text-[#C89A00]'
-                        : 'text-gray-500'
+                      gender === 'FEMALE' ? 'text-[#C89A00]' : 'text-gray-500'
                     }`}
                   >
                     여아
@@ -496,49 +373,27 @@ export default function PetInfoScreen() {
 
           {/* 중성화 */}
           <View className="gap-2">
-            <Text className="text-sm font-semibold text-gray-700">
-              중성화 여부
-            </Text>
+            <Text className="text-sm font-semibold text-gray-700">중성화 여부</Text>
 
             <View className="flex-row gap-3">
               <Pressable
-                onPress={() =>
-                  setIsNeutered(true)
-                }
+                onPress={() => setIsNeutered(true)}
                 className={`flex-1 items-center rounded-xl border p-4 ${
-                  isNeutered
-                    ? 'border-yellow-400 bg-yellow-50'
-                    : 'border-gray-300 bg-white'
+                  isNeutered ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300 bg-white'
                 }`}
               >
-                <Text
-                  className={
-                    isNeutered
-                      ? 'font-semibold text-[#C89A00]'
-                      : 'text-gray-600'
-                  }
-                >
+                <Text className={isNeutered ? 'font-semibold text-[#C89A00]' : 'text-gray-600'}>
                   완료
                 </Text>
               </Pressable>
 
               <Pressable
-                onPress={() =>
-                  setIsNeutered(false)
-                }
+                onPress={() => setIsNeutered(false)}
                 className={`flex-1 items-center rounded-xl border p-4 ${
-                  !isNeutered
-                    ? 'border-yellow-400 bg-yellow-50'
-                    : 'border-gray-300 bg-white'
+                  !isNeutered ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300 bg-white'
                 }`}
               >
-                <Text
-                  className={
-                    !isNeutered
-                      ? 'font-semibold text-[#C89A00]'
-                      : 'text-gray-600'
-                  }
-                >
+                <Text className={!isNeutered ? 'font-semibold text-[#C89A00]' : 'text-gray-600'}>
                   미완료
                 </Text>
               </Pressable>
@@ -547,9 +402,7 @@ export default function PetInfoScreen() {
 
           {/* 특이사항 */}
           <View className="gap-2">
-            <Text className="text-sm font-semibold text-gray-700">
-              특이사항 (선택)
-            </Text>
+            <Text className="text-sm font-semibold text-gray-700">특이사항 (선택)</Text>
 
             <TextInput
               placeholder="기저질환, 알러지, 복용 중인 약 등"
@@ -563,11 +416,7 @@ export default function PetInfoScreen() {
           </View>
 
           {/* 에러 */}
-          {errorMessage ? (
-            <Text className="text-sm text-red-500">
-              {errorMessage}
-            </Text>
-          ) : null}
+          {errorMessage ? <Text className="text-sm text-red-500">{errorMessage}</Text> : null}
 
           {/* 저장 버튼 */}
           <PrimaryButton

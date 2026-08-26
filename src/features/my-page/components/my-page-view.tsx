@@ -58,19 +58,13 @@ export function MyPageView({
 
       <View className="flex-1 gap-4 px-5 pt-2">
         {/* 반려동물 카드 */}
-        <View
-          className="rounded-2xl bg-paper-card p-5"
-          style={CARD_SHADOW}
-        >
+        <View className="rounded-2xl bg-paper-card p-5" style={CARD_SHADOW}>
           {pet ? (
             <>
               <View className="flex-row items-center gap-4">
                 <View className="h-16 w-16 overflow-hidden rounded-full bg-brand-100">
                   {pet.profileImage ? (
-                    <AuthImage
-                      path={pet.profileImage}
-                      className="h-full w-full"
-                    />
+                    <AuthImage path={pet.profileImage} className="h-full w-full" />
                   ) : (
                     <View className="h-full w-full items-center justify-center">
                       <Text className="text-2xl font-bold text-brand-700">
@@ -81,9 +75,7 @@ export function MyPageView({
                 </View>
 
                 <View className="flex-1 gap-1">
-                  <Text className="text-lg font-bold text-ink">
-                    {pet.name}
-                  </Text>
+                  <Text className="text-lg font-bold text-ink">{pet.name}</Text>
 
                   <Text className="text-sm text-ink-muted">
                     {pet.ageLabel} {GENDER_SYMBOL[pet.gender]}
@@ -100,16 +92,12 @@ export function MyPageView({
                 accessibilityRole="button"
                 className="mt-4 self-end rounded-full border border-ink-line px-4 py-2 active:opacity-70"
               >
-                <Text className="text-xs font-semibold text-ink-muted">
-                  프로필 보기
-                </Text>
+                <Text className="text-xs font-semibold text-ink-muted">프로필 보기</Text>
               </Pressable>
             </>
           ) : (
             <View className="items-center py-6">
-              <Text className="text-base font-semibold text-ink">
-                등록된 반려동물이 없습니다.
-              </Text>
+              <Text className="text-base font-semibold text-ink">등록된 반려동물이 없습니다.</Text>
 
               <Text className="mt-2 text-center text-sm text-ink-muted">
                 서비스를 이용하려면 반려동물을 등록해주세요.
@@ -119,47 +107,27 @@ export function MyPageView({
                 onPress={onPressAddPet}
                 className="mt-4 rounded-xl border border-brand-400 px-5 py-3 active:opacity-70"
               >
-                <Text className="text-sm font-semibold text-brand-700">
-                  반려동물 등록하기
-                </Text>
+                <Text className="text-sm font-semibold text-brand-700">반려동물 등록하기</Text>
               </Pressable>
             </View>
           )}
         </View>
 
         {/* 사용자 메뉴 */}
-        <View
-          className="rounded-2xl bg-paper-card"
-          style={CARD_SHADOW}
-        >
-          <MenuRow
-            icon="person-outline"
-            label="내 정보 확인"
-            onPress={onPressMyInfo}
-          />
+        <View className="rounded-2xl bg-paper-card" style={CARD_SHADOW}>
+          <MenuRow icon="person-outline" label="내 정보 확인" onPress={onPressMyInfo} />
 
           <MenuDivider />
 
-          <MenuRow
-            icon="document-text-outline"
-            label="분석 기록"
-            onPress={onPressRecords}
-          />
+          <MenuRow icon="document-text-outline" label="분석 기록" onPress={onPressRecords} />
 
           <MenuDivider />
 
-          <MenuRow
-            icon="heart-outline"
-            label="즐겨찾는 병원"
-            onPress={onPressFavoriteHospitals}
-          />
+          <MenuRow icon="heart-outline" label="즐겨찾는 병원" onPress={onPressFavoriteHospitals} />
         </View>
 
         {/* 설정 메뉴 */}
-        <View
-          className="rounded-2xl bg-paper-card"
-          style={CARD_SHADOW}
-        >
+        <View className="rounded-2xl bg-paper-card" style={CARD_SHADOW}>
           <MenuRow
             icon="notifications-outline"
             label="알림 설정"
@@ -168,19 +136,11 @@ export function MyPageView({
 
           <MenuDivider />
 
-          <MenuRow
-            icon="help-circle-outline"
-            label="고객센터"
-            onPress={onPressCustomerCenter}
-          />
+          <MenuRow icon="help-circle-outline" label="고객센터" onPress={onPressCustomerCenter} />
 
           <MenuDivider />
 
-          <MenuRow
-            icon="information-circle-outline"
-            label="앱 정보"
-            onPress={onPressAppInfo}
-          />
+          <MenuRow icon="information-circle-outline" label="앱 정보" onPress={onPressAppInfo} />
         </View>
       </View>
     </>
