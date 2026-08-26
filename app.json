@@ -10,7 +10,17 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.babymungsoo.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSExceptionDomains": {
+            "daumcdn.net": {
+              "NSIncludesSubdomains": true,
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
+      }
     },
     "android": {
       "package": "com.babymungsoo.app",
@@ -44,6 +54,7 @@
           "cameraPermission": "반려동물 증상을 촬영하려면 카메라 접근 권한이 필요해요."
         }
       ],
+      "expo-image",
       [
         "expo-location",
         {
