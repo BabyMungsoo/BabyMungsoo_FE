@@ -1,12 +1,10 @@
-import { Image } from 'expo-image';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { PhotoStrip } from '@/components/ui/photo-strip';
 import { TriageBadge } from '@/components/ui/triage-badge';
 import { TRIAGE_LEVEL_META, toTriageLevel } from '@/constants/triage';
 import { formatDateTime } from '@/lib/format';
 import type { AnalysisRecord } from '@/types';
-
-const PHOTO_HEIGHT = 180;
 
 interface RecordDetailViewProps {
   record: AnalysisRecord;
@@ -55,33 +53,7 @@ export function RecordDetailView({
           elevation: 1,
         }}
       >
-        {photoUrls.length === 1 && (
-          <Image
-            source={{ uri: photoUrls[0] }}
-            style={{ height: PHOTO_HEIGHT, width: '100%', borderRadius: 16 }}
-            contentFit="cover"
-            transition={150}
-          />
-        )}
-
-        {photoUrls.length > 1 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-2"
-          >
-            {photoUrls.map((uri, index) => (
-              <Image
-                key={uri}
-                source={{ uri }}
-                accessibilityLabel={`첨부 사진 ${index + 1}`}
-                style={{ height: PHOTO_HEIGHT, width: PHOTO_HEIGHT, borderRadius: 16 }}
-                contentFit="cover"
-                transition={150}
-              />
-            ))}
-          </ScrollView>
-        )}
+        <PhotoStrip photoUrls={photoUrls} />
 
         <View className={`flex-row items-center gap-2 ${photoUrls.length > 0 ? 'mt-4' : ''}`}>
           {level && <TriageBadge level={level} />}
