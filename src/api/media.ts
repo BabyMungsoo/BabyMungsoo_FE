@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 import type { ApiResponse, Media, MediaAnalysis, UploadFile } from '@/types';
 
 import { api, ApiError } from './client';
@@ -7,31 +9,43 @@ function unwrap<T>(res: ApiResponse<T>): T {
   if (!res.success || res.data === null) {
     throw new ApiError(res.message ?? '미디어 요청에 실패했습니다.');
   }
+
   return res.data;
 }
 
 export const mediaApi = {
   /**
-   * POST /media/upload — 현재 백엔드는 이미지만 허용합니다(동영상은 400).
+   * POST /media/upload
    *
-   * expo-image-picker 결과를 그대로 넘기면 됩니다:
-   *   const asset = result.assets[0];
-   *   upload({ uri: asset.uri, name: asset.fileName ?? 'photo.jpg', type: asset.mimeType ?? 'image/jpeg' })
+   * 백엔드는 multipart/form-data 의 "file" 필드를 받습니다.
+   * 웹과 React Native의 FormData 파일 처리 방식이 달라 플랫폼별로 분기합니다.
    */
   upload: async (file: UploadFile) => {
     const form = new FormData();
-    // RN 의 FormData 는 { uri, name, type } 객체를 파일로 취급합니다 (웹의 File 과 다름)
-    form.append('file', file as unknown as Blob);
 
-    const { data } = await api.post<ApiResponse<Media>>('/media/upload', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    if (Platform.OS === 'web') {
+      const response = await fetch(file.uri);
+
+      if (!response.ok) {
+        throw new ApiError('선택한 이미지를 불러오지 못했습니다.');
+      }
+
+      const blob = await response.blob();
+
+      form.append('file', blob, file.name);
+    } else {
+      form.append('file', file as unknown as Blob);
+    }
+
+    const { data } = await api.post<ApiResponse<Media>>('/media/upload', form);
+
     return unwrap(data);
   },
 
   /** GET /media/{mediaId} */
   detail: async (mediaId: number) => {
     const { data } = await api.get<ApiResponse<Media>>(`/media/${mediaId}`);
+
     return unwrap(data);
   },
 
@@ -40,9 +54,10 @@ export const mediaApi = {
     await api.delete<ApiResponse<void>>(`/media/${mediaId}`);
   },
 
-  /** POST /media/{mediaId}/analyze — AI 분석 요청 */
+  /** POST /media/{mediaId}/analyze */
   analyze: async (mediaId: number) => {
     const { data } = await api.post<ApiResponse<MediaAnalysis>>(`/media/${mediaId}/analyze`);
+
     return unwrap(data);
   },
 };

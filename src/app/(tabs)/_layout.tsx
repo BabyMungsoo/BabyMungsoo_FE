@@ -94,6 +94,8 @@ export default function TabLayout() {
       {/* 11·12번 알림 설정 / 고객센터는 마이페이지에서 들어가는 화면이라 탭 목록에는 안 띄웁니다. */}
       <Tabs.Screen name="notification-settings" options={{ href: null }} />
       <Tabs.Screen name="customer-center" options={{ href: null }} />
+      <Tabs.Screen name="pet-profile" options={{ href: null }} />
+      <Tabs.Screen name="my-info" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -8,7 +8,41 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { queryClient } from '@/lib/query-client';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect } from 'react';
+
+import { setAuthToken } from '@/api';
+import { useSessionStore } from '@/stores/use-session-store';
+
 export default function RootLayout() {
+  const setSession = useSessionStore((state) => state.setSession);
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      const [accessToken, userId, email, name] = await Promise.all([
+        AsyncStorage.getItem('accessToken'),
+        AsyncStorage.getItem('userId'),
+        AsyncStorage.getItem('email'),
+        AsyncStorage.getItem('name'),
+      ]);
+
+      if (!accessToken || !userId || !email || !name) {
+        return;
+      }
+
+      setAuthToken(accessToken);
+
+      setSession({
+        accessToken,
+        userId: Number(userId),
+        email,
+        name,
+      });
+    };
+
+    restoreSession();
+  }, [setSession]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
