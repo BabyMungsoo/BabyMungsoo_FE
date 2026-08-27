@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PhotoStrip } from '@/components/ui/photo-strip';
 import { toTriageLevel } from '@/constants/triage';
 import type { TriageAnalyzeResult, TriageLevel } from '@/types';
 
@@ -49,6 +50,11 @@ interface ResultViewProps {
   result: TriageAnalyzeResult;
   /** 문진 세션의 initialSymptom — 사용자가 처음 입력한 증상 원문 */
   initialSymptom: string;
+  /**
+   * 문진에 첨부해 분석에 함께 쓰인 사진들 (절대 URL).
+   * 세션의 media 를 라우트가 변환해서 넘깁니다. 사진 없이 분석했으면 빈 배열입니다.
+   */
+  photoUrls?: string[];
   onPressRetry: () => void;
   onPressQuickGuide: (key: QuickGuideKey) => void;
 }
@@ -64,6 +70,7 @@ interface ResultViewProps {
 export function ResultView({
   result,
   initialSymptom,
+  photoUrls = [],
   onPressRetry,
   onPressQuickGuide,
 }: ResultViewProps) {
@@ -85,6 +92,9 @@ export function ResultView({
           <View className="gap-2">
             <Text className="text-base font-bold text-ink">증상 요약</Text>
             <View className="gap-3 rounded-2xl border border-brand-300 bg-paper-card p-4">
+              {/* 사진을 글보다 위에 둡니다 — 7번(분석기록 상세)의 배치와 같게 맞췄습니다 */}
+              <PhotoStrip photoUrls={photoUrls} />
+
               <Text className="text-sm leading-6 text-ink">{initialSymptom}</Text>
 
               {symptomItems.length > 1 && (
