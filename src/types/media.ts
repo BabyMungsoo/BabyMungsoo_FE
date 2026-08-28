@@ -26,4 +26,12 @@ export interface UploadFile {
   uri: string;
   name: string;
   type: string;
+  /**
+   * 웹에서만 채워집니다 — expo-image-picker 가 `asset.file` 로 주는 브라우저 File 객체.
+   *
+   * 브라우저의 FormData 는 Blob/File 이 아닌 값을 문자열로 바꿔 버려서, 네이티브처럼
+   * { uri, name, type } 객체를 넣으면 '[object Object]' 가 전송됩니다.
+   * 네이티브에서는 undefined 입니다.
+   */
+  file?: Blob;
 }

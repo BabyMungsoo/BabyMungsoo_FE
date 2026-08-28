@@ -82,6 +82,9 @@ export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
         uri: asset.uri,
         name: asset.fileName ?? `photo-${Date.now()}-${index}.jpg`,
         type: asset.mimeType ?? 'image/jpeg',
+        // 웹에서만 채워집니다. 브라우저 FormData 는 uri 문자열이 아니라 File 객체가 필요합니다
+        // (웹의 asset.uri 는 URL.createObjectURL 로 만든 blob: URL 이라 그대로는 못 씁니다).
+        file: asset.file,
       }));
 
     setItems((prev) => [
