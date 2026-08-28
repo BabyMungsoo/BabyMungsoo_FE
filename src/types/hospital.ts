@@ -30,18 +30,18 @@ export interface Hospital {
 /**
  * GET /hospitals/recommend 의 level.
  *
- * 주의: 분석기록 쪽 TriageLevel(IMMEDIATE / WATCH / NORMAL) 과 값이 다릅니다.
- * 가운데 등급이 WATCH 가 아니라 URGENT 라서, 7번 상세에서 넘어올 때
- * features/hospitals/to-hospital-level.ts 로 변환해서 넘겨야 합니다.
+ * 분석기록 쪽 TriageLevel(IMMEDIATE / WATCH / NORMAL) 과 값이 같습니다.
+ * 예전에는 가운데 등급이 URGENT 였는데, 백엔드가 공용 TriageLevel 로 통일하면서
+ * URGENT 는 더 이상 받지 않습니다(보내면 400).
  */
-export const HOSPITAL_LEVELS = ['IMMEDIATE', 'URGENT', 'NORMAL'] as const;
+export const HOSPITAL_LEVELS = ['IMMEDIATE', 'WATCH', 'NORMAL'] as const;
 export type HospitalLevel = (typeof HOSPITAL_LEVELS)[number];
 
 /** GET /api/v1/hospitals/recommend 쿼리 파라미터 */
 export interface HospitalRecommendParams {
   lat: number;
   lng: number;
-  /** NORMAL / URGENT → 반경 약 5km 전체, IMMEDIATE → 그중 24시간 병원만 */
+  /** NORMAL / WATCH → 반경 약 5km 전체, IMMEDIATE → 그중 24시간 병원만 */
   level: HospitalLevel;
 }
 
