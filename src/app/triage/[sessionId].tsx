@@ -33,8 +33,8 @@ export default function TriageQuestionScreen() {
   const completeSession = useCompleteTriageSession();
 
   // 진행률 표시와 답변 목록 라벨에만 씁니다. 답변 수는 세션에, 전체 문항 수는 질문 목록에 있습니다.
-  const { data: questionSet } = useTriageQuestionSet(validId);
-  const questions = questionSet?.questions;
+  const questionSetQuery = useTriageQuestionSet(validId);
+  const questions = questionSetQuery.data?.questions;
 
   const [answer, setAnswer] = useState('');
 
@@ -79,7 +79,16 @@ export default function TriageQuestionScreen() {
   };
 
   const isLoading = session.isPending || nextQuestion.isPending;
-  const error = session.error ?? nextQuestion.error;
+
+  // 질문 목록 조회가 실패하면 진행률이 0/0 으로 보일 뿐 이유가 드러나지 않아 함께 묶습니다.
+  const error = session.error ?? nextQuestion.error ?? questionSetQuery.error;
+
+  /** 실패한 쿼리만 골라 다시 부릅니다. 하나만 재시도하면 다른 쪽 에러에서 못 빠져나옵니다. */
+  const handleRetry = () => {
+    if (session.error) session.refetch();
+    if (nextQuestion.error) nextQuestion.refetch();
+    if (questionSetQuery.error) questionSetQuery.refetch();
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
@@ -95,7 +104,7 @@ export default function TriageQuestionScreen() {
         {error && (
           <View className="gap-2 rounded-2xl bg-red-50 p-4">
             <Text className="text-sm text-red-700">{error.message}</Text>
-            <Pressable onPress={() => nextQuestion.refetch()} accessibilityRole="button">
+            <Pressable onPress={handleRetry} accessibilityRole="button">
               <Text className="text-xs font-semibold text-red-500">다시 시도</Text>
             </Pressable>
           </View>

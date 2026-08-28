@@ -103,10 +103,16 @@ export function useSaveAnswer(sessionId: number | undefined) {
 
   return useMutation({
     mutationFn: (body: AnswerCreateRequest) => triageApi.saveAnswer(sessionId!, body),
-    onSuccess: () => {
+    onSuccess: async () => {
       if (sessionId == null) return;
-      queryClient.invalidateQueries({ queryKey: queryKeys.triage.nextQuestion(sessionId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.triage.session(sessionId) });
+
+      // 프로미스를 반환해야 재조회가 끝날 때까지 isPending 이 유지됩니다.
+      // 그러지 않으면 저장 직후 버튼이 다시 눌리는데 화면에는 방금 답한 질문이 그대로 남아 있어,
+      // 빠르게 다시 누르면 같은 questionId 로 답변이 한 번 더 저장됩니다.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.triage.nextQuestion(sessionId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.triage.session(sessionId) }),
+      ]);
     },
   });
 }
