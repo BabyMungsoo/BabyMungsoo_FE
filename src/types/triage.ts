@@ -49,6 +49,17 @@ export interface AnswerCreateRequest {
   content: string;
 }
 
+/**
+ * POST /api/v1/triage/sessions/{sessionId}/questions — 추가 문진 질문 생성 결과.
+ *
+ * 초기 증상만으로 충분하거나 생성에 실패하면 needsAdditionalQuestions 가 false 로 오고
+ * questions 는 빈 배열입니다. 이때는 질문 화면을 거치지 않고 바로 분석으로 갑니다.
+ */
+export interface TriageQuestionSet {
+  needsAdditionalQuestions: boolean;
+  questions: Question[];
+}
+
 /** POST /api/v1/triage/analyze */
 export interface TriageAnalyzeRequest {
   sessionId: number;

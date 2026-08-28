@@ -17,9 +17,9 @@ export const queryKeys = {
   },
   triage: {
     all: ['triage'] as const,
-    questions: (symptomCategory?: string) =>
-      ['triage', 'questions', symptomCategory ?? null] as const,
     session: (sessionId: number) => ['triage', 'session', sessionId] as const,
+    /** 세션별로 생성된 추가 문진 질문 목록 */
+    questionSet: (sessionId: number) => ['triage', 'session', sessionId, 'question-set'] as const,
     nextQuestion: (sessionId: number) => ['triage', 'session', sessionId, 'next-question'] as const,
     analysis: (sessionId: number) => ['triage', 'analysis', sessionId] as const,
   },
