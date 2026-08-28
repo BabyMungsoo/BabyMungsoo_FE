@@ -8,11 +8,21 @@ import { MediaUploadGrid } from '@/features/home/media-upload-grid';
 import { PetSelector } from '@/features/home/pet-selector';
 import { SymptomInput } from '@/features/home/symptom-input';
 import { usePets } from '@/hooks/queries/use-pets';
-import { useCompleteTriageSession, useCreateTriageSession } from '@/hooks/queries/use-triage';
+import {
+  useCompleteTriageSession,
+  useCreateTriageSession,
+  useGenerateTriageQuestions,
+} from '@/hooks/queries/use-triage';
 import { notify } from '@/lib/confirm';
 import { usePetStore } from '@/stores/use-pet-store';
 
-/** 1번 — 홈. 반려동물·증상을 받아 문진 세션을 만들고 곧바로 분석 화면(8·4번)으로 넘깁니다. */
+/**
+ * 1번 — 홈.
+ *
+ * 반려동물·증상·사진을 받아 문진 세션을 만든 뒤, 서버에 추가 질문 생성을 요청합니다.
+ * 질문이 있으면 추가 문진 화면으로, 없으면 곧바로 분석 화면(8·4번)으로 넘깁니다.
+ * 증상 분류는 보호자가 고르지 않습니다. 초기 증상을 보고 서버가 물어볼 것을 정합니다.
+ */
 export default function HomeScreen() {
   const router = useRouter();
   const { data: pets, isPending, error, refetch } = usePets();
@@ -21,8 +31,10 @@ export default function HomeScreen() {
   const [mediaIds, setMediaIds] = useState<number[]>([]);
 
   const createSession = useCreateTriageSession();
+  const generateQuestions = useGenerateTriageQuestions();
   const completeSession = useCompleteTriageSession();
-  const isStarting = createSession.isPending || completeSession.isPending;
+  const isStarting =
+    createSession.isPending || generateQuestions.isPending || completeSession.isPending;
 
   useEffect(() => {
     if (pets && pets.length > 0 && !pets.some((pet) => pet.petId === selectedPetId)) {
@@ -47,13 +59,24 @@ export default function HomeScreen() {
     }
 
     try {
-      // 홈에서는 카테고리별 추가 질문 없이 바로 분석하므로 symptomCategory 는 비워 둡니다.
+      // 증상 분류는 보호자가 고르지 않습니다. 초기 증상을 보고 AI 가 물어볼 것을 정합니다.
       const session = await createSession.mutateAsync({
         petId: selectedPetId,
         initialSymptom,
         symptomCategory: '',
         mediaIds,
       });
+
+      // 질문 생성이 실패해도 서버가 '질문 없음'으로 내려주므로, 여기서는 플래그만 봅니다.
+      const questionSet = await generateQuestions.mutateAsync(session.sessionId);
+
+      if (questionSet.needsAdditionalQuestions) {
+        // 새로 추가한 라우트라 expo-router 의 타입이 아직 모릅니다.
+        // `expo start` 로 .expo/types 가 재생성되면 캐스팅 없이도 통과합니다.
+        router.push(`/triage/${session.sessionId}` as never);
+        return;
+      }
+
       await completeSession.mutateAsync(session.sessionId);
       router.push(`/analysis/${session.sessionId}`);
     } catch (err) {
@@ -118,7 +141,11 @@ export default function HomeScreen() {
             className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
           >
             <Text className="text-center text-base font-bold text-ink">
-              {isStarting ? '분석 준비 중...' : 'AI 분석 시작하기'}
+              {generateQuestions.isPending
+                ? '맞춤 질문을 준비하고 있어요...'
+                : isStarting
+                  ? '분석 준비 중...'
+                  : 'AI 분석 시작하기'}
             </Text>
           </Pressable>
 

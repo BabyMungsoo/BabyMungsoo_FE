@@ -4,6 +4,7 @@ import type {
   Question,
   TriageAnalyzeRequest,
   TriageAnalyzeResult,
+  TriageQuestionSet,
   TriageSession,
   TriageSessionCreateRequest,
 } from '@/types';
@@ -26,11 +27,19 @@ export const triageApi = {
     return data;
   },
 
-  /** GET /triage/questions — symptomCategory 를 빼면 전체 질문 */
-  getQuestions: async (symptomCategory?: string) => {
-    const { data } = await api.get<Question[]>('/triage/questions', {
-      params: symptomCategory ? { symptomCategory } : undefined,
-    });
+  /**
+   * POST /triage/sessions/{sessionId}/questions — 초기 증상을 보고 추가 질문을 만듭니다.
+   *
+   * Claude 호출이 들어 있어 analyze 와 같은 긴 타임아웃을 씁니다(기본 15초로는 모자랍니다).
+   * 서버가 생성 실패를 오류로 올리지 않고 needsAdditionalQuestions=false 로 내려주므로,
+   * 호출부는 성공/실패가 아니라 이 플래그만 보면 됩니다.
+   */
+  generateQuestions: async (sessionId: number) => {
+    const { data } = await api.post<TriageQuestionSet>(
+      `/triage/sessions/${sessionId}/questions`,
+      undefined,
+      { timeout: ANALYZE_TIMEOUT_MS },
+    );
     return data;
   },
 
