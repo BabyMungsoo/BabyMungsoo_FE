@@ -22,6 +22,8 @@ export default function HospitalsScreen() {
   const { center, isRealLocation, status, retry: retryLocation } = useCurrentLocation();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [mapErrored, setMapErrored] = useState(false);
+  // '24시간' 필터. 켜면 24시간 진료 병원만 지도에 남깁니다.
+  const [only24h, setOnly24h] = useState(false);
 
   // 조회 기준점. 지도를 옮겨 재검색하기 전까지는 현재 위치를 씁니다.
   const [searchCenter, setSearchCenter] = useState<LatLng | null>(null);
@@ -39,8 +41,19 @@ export default function HospitalsScreen() {
   const { data, isPending, error, refetch } = useRecommendedHospitals(params);
 
   const hospitals = data?.hospitals;
-  const markers = useMemo(() => toMapMarkers(hospitals ?? []), [hospitals]);
-  const selected = hospitals?.find((hospital) => hospital.hospitalId === selectedId) ?? null;
+
+  /**
+   * IMMEDIATE 로 요청하면 백엔드가 이미 24시간 병원만 주지만, 탭에서 바로 들어오면
+   * 반경 전체가 옵니다. 그때도 필터가 동작하도록 화면에서 한 번 더 걸러 줍니다.
+   */
+  const visibleHospitals = useMemo(() => {
+    const list = hospitals ?? [];
+    return only24h ? list.filter((hospital) => hospital.is24hour) : list;
+  }, [hospitals, only24h]);
+
+  const markers = useMemo(() => toMapMarkers(visibleHospitals), [visibleHospitals]);
+  // 걸러진 목록에서 찾으므로, 고른 병원이 필터에 걸리면 카드가 저절로 닫힙니다
+  const selected = visibleHospitals.find((hospital) => hospital.hospitalId === selectedId) ?? null;
 
   function handleBack() {
     if (router.canGoBack()) {
@@ -76,7 +89,9 @@ export default function HospitalsScreen() {
       isPending={isPending}
       error={error}
       onRetry={handleRetry}
-      hospitalCount={hospitals?.length ?? 0}
+      hospitalCount={visibleHospitals.length}
+      only24h={only24h}
+      onToggle24h={() => setOnly24h((previous) => !previous)}
       fellBackToNormal={data?.fellBackToNormal ?? false}
       isFallbackLocation={status !== 'loading' && !isRealLocation}
       mapUnavailable={!KAKAO_JS_KEY || mapErrored}

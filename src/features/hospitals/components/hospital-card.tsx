@@ -55,18 +55,15 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
       </Pressable>
 
       <View className="flex-row gap-3">
-        {/* 사진이 아직 없는 병원이 대부분이라, 없으면 발바닥 자리표시로 대신합니다 */}
-        {hospital.imageUrl ? (
+        {/* 사진이 있는 병원만 썸네일을 그립니다. imageUrl 이 대부분 null 이라
+            자리표시를 두면 정보 없는 그림이 이름 자리를 좁힙니다. */}
+        {hospital.imageUrl && (
           <Image
             source={{ uri: hospital.imageUrl }}
             style={{ height: 72, width: 72, borderRadius: 12 }}
             contentFit="cover"
             transition={150}
           />
-        ) : (
-          <View className="h-[72px] w-[72px] items-center justify-center rounded-xl bg-brand-100">
-            <Ionicons name="paw" size={28} color="#d9a50f" />
-          </View>
         )}
 
         <View className="flex-1 gap-1">
@@ -79,7 +76,12 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
           )}
 
           {hospital.is24hour ? (
-            <Text className="text-sm font-semibold text-triage-normal">24시간 진료</Text>
+            <View className="gap-0.5">
+              <Text className="text-sm font-semibold text-triage-normal">24시간 진료</Text>
+              {/* 백엔드가 상호명('24시…')으로 추정한 값이라 100% 정확하지 않습니다.
+                  응급 상황에 헛걸음하면 피해가 크니 확인을 함께 안내합니다. */}
+              <Text className="text-xs text-ink-soft">방문 전 전화로 확인해 주세요</Text>
+            </View>
           ) : (
             !!hospital.openHours && (
               <Text className="text-sm text-ink-muted" numberOfLines={1}>

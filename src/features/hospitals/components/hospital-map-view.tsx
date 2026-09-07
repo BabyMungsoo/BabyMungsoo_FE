@@ -24,8 +24,11 @@ interface HospitalMapViewProps {
   error: Error | null;
   onRetry: () => void;
 
-  /** 병원이 0곳일 때 안내를 띄우기 위해 목록 길이를 따로 받습니다 */
+  /** 병원이 0곳일 때 안내를 띄우기 위해 (필터 적용 후) 목록 길이를 따로 받습니다 */
   hospitalCount: number;
+  /** '24시간 병원만' 필터가 켜져 있는지 */
+  only24h: boolean;
+  onToggle24h: () => void;
   /** 24시간 병원이 없어 반경 전체 결과로 대체했는지 */
   fellBackToNormal: boolean;
   /** 위치 권한을 못 받아 기본 좌표(서울시청)를 쓰고 있는지 */
@@ -55,6 +58,8 @@ export function HospitalMapView({
   error,
   onRetry,
   hospitalCount,
+  only24h,
+  onToggle24h,
   fellBackToNormal,
   isFallbackLocation,
   mapUnavailable,
@@ -127,7 +132,13 @@ export function HospitalMapView({
           <Notice text="24시간 병원 정보가 아직 없어 주변 병원을 모두 보여드려요." />
         )}
         {!isPending && !error && hospitalCount === 0 && (
-          <Notice text="주변 5km 안에 등록된 동물병원이 없어요." />
+          <Notice
+            text={
+              only24h
+                ? '주변에 24시간 진료 병원이 없어요. 필터를 끄면 전체 병원이 보여요.'
+                : '주변 5km 안에 등록된 동물병원이 없어요.'
+            }
+          />
         )}
         {error && <Notice text={error.message} onRetry={onRetry} />}
       </View>
@@ -140,15 +151,21 @@ export function HospitalMapView({
         </View>
       )}
 
-      {selected && (
-        <View
-          pointerEvents="box-none"
-          className="absolute bottom-0 left-0 right-0 px-4"
-          style={{ paddingBottom: 16 }}
-        >
-          <HospitalCard hospital={selected} onClose={onDeselect} />
+      {/* 하단 층 — 필터 칩과 병원 카드를 함께 둡니다.
+          상단에 타이틀·필터·재검색이 겹쳐 있으면 지도가 가려지고 복잡해 보여서,
+          자주 누르는 필터는 엄지가 닿는 아래쪽으로 내렸습니다.
+          카드가 열리면 칩이 그 위로 밀려 올라가 서로 가리지 않습니다. */}
+      <View
+        pointerEvents="box-none"
+        className="absolute bottom-0 left-0 right-0 gap-4 px-4"
+        style={{ paddingBottom: 16 }}
+      >
+        <View pointerEvents="box-none" className="items-center">
+          <FilterChip label="24시간 병원만" active={only24h} onPress={onToggle24h} />
         </View>
-      )}
+
+        {selected && <HospitalCard hospital={selected} onClose={onDeselect} />}
+      </View>
     </View>
   );
 }
@@ -160,6 +177,44 @@ const FLOATING_SHADOW = {
   shadowOffset: { width: 0, height: 2 },
   elevation: 4,
 } as const;
+
+/**
+ * 지도 아래에 뜨는 필터 칩.
+ *
+ * 켜지면 브랜드색으로 채우고 아이콘이 체크로 바뀝니다. 색만으로 구분하기 어려운 분도
+ * 모양으로 켜짐 여부를 알 수 있게 하려는 것입니다.
+ */
+function FilterChip({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={`24시간 진료 병원만 보기, ${active ? '켜짐' : '꺼짐'}`}
+      className={`flex-row items-center gap-1.5 rounded-full px-4 py-2.5 active:opacity-70 ${
+        active ? 'bg-brand-400' : 'bg-paper-card'
+      }`}
+      style={FLOATING_SHADOW}
+    >
+      <Ionicons
+        name={active ? 'checkmark-circle' : 'time-outline'}
+        size={15}
+        color={active ? '#5c4408' : '#8c867a'}
+      />
+      <Text className={`text-sm font-bold ${active ? 'text-brand-900' : 'text-ink-muted'}`}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
 
 function Notice({ text, onRetry }: { text: string; onRetry?: () => void }) {
   return (
