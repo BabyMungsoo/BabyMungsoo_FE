@@ -22,6 +22,13 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      /**
+       * 기본값(firstRoute)이면 탭 화면에서 뒤로가기를 누를 때 무조건 첫 탭(홈)으로 튑니다.
+       * 병원 찾기·추가 문진처럼 href: null 로 숨겨 둔 화면은 다른 탭에서 밀고 들어오는데,
+       * 거기서 뒤로가기를 누르면 왔던 화면(예: 분석기록 상세)이 아니라 홈이 나옵니다.
+       * history 로 두면 직전에 있던 탭의, 그 탭이 보고 있던 화면으로 돌아갑니다.
+       */
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: ACTIVE,
