@@ -115,6 +115,10 @@ export default function AnalysisScreen() {
         // 증상부터 다시 입력해야 새 세션이 만들어지므로 홈으로 보냅니다.
         onPressRetry={() => router.replace('/')}
         onPressQuickGuide={handleQuickGuide}
+        // 응급도를 넘겨야 9번에서 그 등급에 맞는 병원을 추천받습니다(7번 상세와 같은 방식).
+        onPressFindHospital={() =>
+          router.push({ pathname: '/hospitals', params: { level: result.level } })
+        }
       />
     );
   }
