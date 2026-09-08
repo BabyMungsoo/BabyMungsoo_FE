@@ -57,6 +57,8 @@ interface ResultViewProps {
   photoUrls?: string[];
   onPressRetry: () => void;
   onPressQuickGuide: (key: QuickGuideKey) => void;
+  /** 9번 지도로 이동. 결과의 응급도를 함께 넘겨 그 등급에 맞는 병원을 받습니다 */
+  onPressFindHospital: () => void;
 }
 
 /**
@@ -73,6 +75,7 @@ export function ResultView({
   photoUrls = [],
   onPressRetry,
   onPressQuickGuide,
+  onPressFindHospital,
 }: ResultViewProps) {
   const level = toTriageLevel(result.level);
   const warning = level ? WARNING_STYLE[level] : WARNING_STYLE.NORMAL;
@@ -160,6 +163,20 @@ export function ResultView({
                 <Text className="text-sm font-bold text-ink-muted">다시 진단하기</Text>
               </Pressable>
             </View>
+
+            {/*
+              결과를 본 직후가 병원을 찾는 시점이라 여기에 둡니다. 지금까지는 이 버튼이 없어
+              분석기록 목록·상세를 거쳐야 지도로 갈 수 있었습니다.
+              스타일은 7번(분석기록 상세)의 같은 버튼과 맞췄습니다.
+            */}
+            <Pressable
+              onPress={onPressFindHospital}
+              accessibilityRole="button"
+              className="flex-row items-center justify-center gap-1.5 rounded-2xl bg-brand-400 py-4 active:opacity-70"
+            >
+              <Ionicons name="location" size={18} color="#5c4408" />
+              <Text className="text-base font-bold text-brand-900">병원 찾기</Text>
+            </Pressable>
           </View>
 
           <View className="gap-2">
