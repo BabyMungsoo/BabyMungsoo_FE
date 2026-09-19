@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { Linking, Pressable, Text, View } from 'react-native';
 
+import { HOSPITAL_TAG_LABEL, toHospitalTags } from '@/constants/hospital';
 import { isMissing, type Hospital } from '@/types';
 
 interface HospitalCardProps {
@@ -18,6 +19,7 @@ interface HospitalCardProps {
  */
 export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
   const phone = isMissing(hospital.phone) ? null : hospital.phone!;
+  const tags = toHospitalTags(hospital.tags);
 
   function handleCall() {
     if (!phone) return;
@@ -91,6 +93,20 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
           )}
         </View>
       </View>
+
+      {/* 공식 사이트·기사로 확인된 시설만 태그로 옵니다. 응급 상황에서 'MRI 있는 곳'을
+          바로 고를 수 있게 이름 아래에 뱃지로 둡니다. 태그 없는 병원은 이 줄이 없습니다. */}
+      {tags.length > 0 && (
+        <View className="mt-3 flex-row flex-wrap gap-1.5">
+          {tags.map((tag) => (
+            <View key={tag} className="rounded-md bg-brand-50 px-2 py-1">
+              <Text className="text-xs font-semibold text-brand-800">
+                {HOSPITAL_TAG_LABEL[tag]}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <View className="my-3 h-px bg-ink-line" />
 

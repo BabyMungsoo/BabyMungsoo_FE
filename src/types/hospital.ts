@@ -4,9 +4,16 @@ import type { IsoDateTime } from './common';
  * HospitalResponseDto
  *
  * 백엔드가 카카오 로컬 데이터를 그대로 옮겨 담고 있어서 아직 비어 있는 필드가 많습니다.
- * (2026-08-14 기준 rating / openHours 는 전부 null, is24hour 는 전부 false)
+ * (2026-09-19 기준 rating / openHours 는 전부 null. tags 는 큐레이션된 병원에만 값이 있습니다)
  * 화면에서는 값이 있을 때만 그리도록 해서, 나중에 채워지면 그대로 드러나게 합니다.
  */
+/**
+ * 큐레이션이 공식 사이트·기사로 확인해 붙이는 시설 태그. 백엔드 HospitalTag enum 과 이름이 같습니다.
+ * 백엔드가 값을 늘리면 문자열로 그대로 오므로, 화면은 아는 태그만 그리고 모르는 건 건너뜁니다.
+ */
+export const HOSPITAL_TAGS = ['MRI', 'EMERGENCY_CENTER'] as const;
+export type HospitalTag = (typeof HOSPITAL_TAGS)[number];
+
 export interface Hospital {
   hospitalId: number;
   hospitalName: string;
@@ -25,6 +32,8 @@ export interface Hospital {
   /** 병원 사진 (시안의 카드 왼쪽 썸네일) — 현재 전부 null */
   imageUrl: string | null;
   lastUpdated: IsoDateTime | null;
+  /** 확인된 시설 태그. 큐레이션 병원에만 있고 나머지는 빈 배열 */
+  tags: string[];
 }
 
 /**
