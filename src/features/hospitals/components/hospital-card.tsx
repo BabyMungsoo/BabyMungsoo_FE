@@ -18,6 +18,7 @@ interface HospitalCardProps {
  */
 export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
   const phone = isMissing(hospital.phone) ? null : hospital.phone!;
+  const specialties = splitSpecialties(hospital.specialties);
 
   function handleCall() {
     if (!phone) return;
@@ -77,9 +78,12 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
 
           {hospital.is24hour ? (
             <View className="gap-0.5">
-              <Text className="text-sm font-semibold text-triage-normal">24시간 진료</Text>
-              {/* 백엔드가 상호명('24시…')으로 추정한 값이라 100% 정확하지 않습니다.
-                  응급 상황에 헛걸음하면 피해가 크니 확인을 함께 안내합니다. */}
+              {/* 큐레이션 병원은 '365일 24시간 연중무휴' 같은 출처 문구를 그대로 보여줍니다 */}
+              <Text className="text-sm font-semibold text-triage-normal" numberOfLines={1}>
+                {hospital.openHours || '24시간 진료'}
+              </Text>
+              {/* 상호명('24시…')으로 추정했거나 큐레이션 목록에서 온 값이라, 야간에는 수술·중환자
+                  케어로 대기가 길 수 있습니다. 응급 상황에 헛걸음하면 피해가 크니 확인을 함께 안내합니다. */}
               <Text className="text-xs text-ink-soft">방문 전 전화로 확인해 주세요</Text>
             </View>
           ) : (
@@ -91,6 +95,23 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
           )}
         </View>
       </View>
+
+      {/* 진료 분야는 큐레이션된 24시간 병원에만 있습니다. 응급 상황에서 '정형외과 전문'
+          같은 한 줄이 어느 병원으로 갈지 정하는 데 도움이 됩니다. */}
+      {specialties.length > 0 && (
+        <View className="mt-3 flex-row flex-wrap gap-1.5">
+          {specialties.map((item) => (
+            <View key={item} className="rounded-md bg-brand-50 px-2 py-1">
+              <Text className="text-xs font-semibold text-brand-800">{item}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* MRI·CT 보유, 전문 분야 같은 한 줄 소개. 칩으로 못 담는 문장형 정보라 따로 둡니다. */}
+      {!!hospital.features && (
+        <Text className="mt-2 text-xs leading-5 text-ink-muted">{hospital.features}</Text>
+      )}
 
       <View className="my-3 h-px bg-ink-line" />
 
@@ -125,6 +146,15 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
       </View>
     </View>
   );
+}
+
+/** '24시 응급, CT/MRI' 처럼 쉼표로 이어진 문자열을 칩 목록으로 나눕니다 */
+function splitSpecialties(value: string | null | undefined): string[] {
+  if (!value) return [];
+  return value
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean);
 }
 
 function InfoRow({

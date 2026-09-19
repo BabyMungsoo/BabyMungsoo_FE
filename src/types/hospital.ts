@@ -4,7 +4,7 @@ import type { IsoDateTime } from './common';
  * HospitalResponseDto
  *
  * 백엔드가 카카오 로컬 데이터를 그대로 옮겨 담고 있어서 아직 비어 있는 필드가 많습니다.
- * (2026-08-14 기준 rating / openHours 는 전부 null, is24hour 는 전부 false)
+ * (2026-09-19 기준 rating 은 전부 null. openHours·specialties 는 큐레이션된 24시간 병원에만 있습니다)
  * 화면에서는 값이 있을 때만 그리도록 해서, 나중에 채워지면 그대로 드러나게 합니다.
  */
 export interface Hospital {
@@ -16,8 +16,12 @@ export interface Hospital {
   latitude: number;
   longitude: number;
   is24hour: boolean;
-  /** 카카오 미제공 — 현재 전부 null */
+  /** 카카오 미제공 — 큐레이션(24시간 병원 목록)으로 채운 병원만 값이 있습니다 */
   openHours: string | null;
+  /** 주요 진료 분야. '24시 응급, CT/MRI, 정형외과' 처럼 쉼표로 이어진 문자열. 큐레이션 병원만 값이 있습니다 */
+  specialties: string | null;
+  /** 특징 한 줄 (장비·강점). '대학병원급 MRI, CT 보유, 분과별 전문의 협진' 처럼 문장. 큐레이션 병원만 값이 있습니다 */
+  features: string | null;
   /** 카카오 미제공 — 현재 전부 null */
   rating: number | null;
   /** 리뷰 수 (시안의 평점 옆 '(256)') — 현재 전부 null */
