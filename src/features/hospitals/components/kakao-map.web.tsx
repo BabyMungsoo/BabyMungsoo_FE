@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { View } from 'react-native';
 
 import {
@@ -9,13 +9,14 @@ import {
   type MapMarker,
 } from '@/features/hospitals/kakao-map-script';
 
-import type { KakaoMapProps } from './kakao-map.types';
+import type { KakaoMapHandle, KakaoMapProps } from './kakao-map.types';
 
 declare global {
   interface Window {
     __initMap?: (config: { lat: number; lng: number; level?: number }) => void;
     __renderHospitals?: (list: MapMarker[], selectedId: number | null) => void;
     __moveTo?: (lat: number, lng: number) => void;
+    __zoomBy?: (delta: number) => void;
     __postMapMessage?: (json: string) => void;
   }
 }
@@ -33,15 +34,15 @@ const MAP_SCRIPT_ID = 'kakao-maps-babymungsoo';
  * 웹은 실제 도메인(기본 http://localhost:8081)으로 SDK 를 부르므로,
  * 카카오 developers 에 그 도메인이 Web 플랫폼으로 등록되어 있어야 합니다.
  */
-export function KakaoMap({
-  center,
-  markers,
-  selectedId,
-  onSelect,
-  onDeselect,
-  onMoved,
-  onError,
-}: KakaoMapProps) {
+export const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
+  { center, markers, selectedId, onSelect, onDeselect, onMoved, onError },
+  ref,
+) {
+  useImperativeHandle(ref, () => ({
+    zoomIn: () => window.__zoomBy?.(1),
+    zoomOut: () => window.__zoomBy?.(-1),
+  }));
+
   // 지도 스크립트는 한 번만 붙기 때문에, 콜백은 ref 로 최신 것을 따라가게 합니다.
   // (렌더 중에 ref 를 건드리면 안 되므로 매 렌더 뒤에 갱신합니다)
   const handlersRef = useRef({ onSelect, onDeselect, onMoved, onError });
@@ -97,7 +98,7 @@ export function KakaoMap({
   }, [center.lat, center.lng]);
 
   return <View nativeID="map" style={{ flex: 1, backgroundColor: '#faf8f3' }} />;
-}
+});
 
 /** 카카오 SDK <script> 를 한 번만 붙이고, 로드가 끝나면 resolve 합니다 */
 function loadSdkScript(jsKey: string): Promise<void> {

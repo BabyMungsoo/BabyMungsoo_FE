@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import {
@@ -9,7 +9,7 @@ import {
   type MapMarker,
 } from '@/features/hospitals/kakao-map-script';
 
-import type { KakaoMapProps } from './kakao-map.types';
+import type { KakaoMapHandle, KakaoMapProps } from './kakao-map.types';
 
 /**
  * 앱(iOS/Android)용 카카오맵. 카카오는 RN SDK 를 내주지 않아서
@@ -17,16 +17,17 @@ import type { KakaoMapProps } from './kakao-map.types';
  *
  * 웹은 WebView 가 동작하지 않아 kakao-map.web.tsx 가 대신 쓰입니다.
  */
-export function KakaoMap({
-  center,
-  markers,
-  selectedId,
-  onSelect,
-  onDeselect,
-  onMoved,
-  onError,
-}: KakaoMapProps) {
+export const KakaoMap = forwardRef<KakaoMapHandle, KakaoMapProps>(function KakaoMap(
+  { center, markers, selectedId, onSelect, onDeselect, onMoved, onError },
+  ref,
+) {
   const webViewRef = useRef<WebView>(null);
+
+  // 지도 위 +/- 버튼. 핀치가 어려운 상황(한 손, 시뮬레이터)에서도 확대/축소가 되게 합니다.
+  useImperativeHandle(ref, () => ({
+    zoomIn: () => webViewRef.current?.injectJavaScript('window.__zoomBy(1); true;'),
+    zoomOut: () => webViewRef.current?.injectJavaScript('window.__zoomBy(-1); true;'),
+  }));
 
   // HTML 은 처음 한 번만 만듭니다. 중심이 바뀌어도 지도를 새로 만들지 않고 __moveTo 로 옮깁니다.
   const [html] = useState(() => buildKakaoMapHtml(KAKAO_JS_KEY, center));
@@ -93,4 +94,4 @@ export function KakaoMap({
       style={{ flex: 1, backgroundColor: '#faf8f3' }}
     />
   );
-}
+});
