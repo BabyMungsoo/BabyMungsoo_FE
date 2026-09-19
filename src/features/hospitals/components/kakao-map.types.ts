@@ -18,3 +18,12 @@ export interface KakaoMapProps {
   /** SDK 를 못 불러왔을 때 (키 오류·도메인 미등록 등) */
   onError?: () => void;
 }
+
+/**
+ * 화면(hospital-map-view)이 ref 로 지도를 조작할 때 쓰는 손잡이.
+ * 앱은 WebView 에 injectJavaScript 로, 웹은 window 전역으로 같은 __zoomBy 를 부릅니다.
+ */
+export interface KakaoMapHandle {
+  zoomIn: () => void;
+  zoomOut: () => void;
+}

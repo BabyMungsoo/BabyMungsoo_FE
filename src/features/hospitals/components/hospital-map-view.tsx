@@ -1,9 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useRef } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HospitalCard } from '@/features/hospitals/components/hospital-card';
 import { KakaoMap } from '@/features/hospitals/components/kakao-map';
+import type { KakaoMapHandle } from '@/features/hospitals/components/kakao-map.types';
 import type { MapMarker } from '@/features/hospitals/kakao-map-script';
 import type { Hospital, LatLng } from '@/types';
 
@@ -66,10 +68,12 @@ export function HospitalMapView({
   onMapError,
 }: HospitalMapViewProps) {
   const insets = useSafeAreaInsets();
+  const mapRef = useRef<KakaoMapHandle>(null);
 
   return (
     <View className="flex-1 bg-paper">
       <KakaoMap
+        ref={mapRef}
         center={center}
         markers={markers}
         selectedId={selected?.hospitalId ?? null}
@@ -143,6 +147,15 @@ export function HospitalMapView({
         {error && <Notice text={error.message} onRetry={onRetry} />}
       </View>
 
+      {/* 확대/축소 버튼. 핀치는 한 손으로 어렵고, 시뮬레이터·트랙패드에선 스크롤이 지도 이동으로
+          먹혀 확대가 안 됩니다. 오른쪽 가운데보다 조금 위에 둬서 아래 카드가 열려도 안 가립니다. */}
+      <View pointerEvents="box-none" className="absolute right-4" style={{ top: '34%' }}>
+        <ZoomButtons
+          onZoomIn={() => mapRef.current?.zoomIn()}
+          onZoomOut={() => mapRef.current?.zoomOut()}
+        />
+      </View>
+
       {isPending && (
         <View pointerEvents="none" className="absolute inset-0 items-center justify-center">
           <View className="rounded-2xl bg-paper-card px-5 py-4" style={FLOATING_SHADOW}>
@@ -177,6 +190,31 @@ const FLOATING_SHADOW = {
   shadowOffset: { width: 0, height: 2 },
   elevation: 4,
 } as const;
+
+/** 세로로 붙은 + / − 두 버튼. 하나의 알약으로 보이게 가운데 선으로만 나눕니다. */
+function ZoomButtons({ onZoomIn, onZoomOut }: { onZoomIn: () => void; onZoomOut: () => void }) {
+  return (
+    <View className="overflow-hidden rounded-full bg-paper-card" style={FLOATING_SHADOW}>
+      <Pressable
+        onPress={onZoomIn}
+        accessibilityRole="button"
+        accessibilityLabel="지도 확대"
+        className="h-11 w-11 items-center justify-center active:bg-paper-chip"
+      >
+        <Ionicons name="add" size={22} color="#2e2a24" />
+      </Pressable>
+      <View className="mx-3 h-px bg-ink-line" />
+      <Pressable
+        onPress={onZoomOut}
+        accessibilityRole="button"
+        accessibilityLabel="지도 축소"
+        className="h-11 w-11 items-center justify-center active:bg-paper-chip"
+      >
+        <Ionicons name="remove" size={22} color="#2e2a24" />
+      </Pressable>
+    </View>
+  );
+}
 
 /**
  * 지도 아래에 뜨는 필터 칩.

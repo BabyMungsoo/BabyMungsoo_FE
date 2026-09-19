@@ -51,10 +51,11 @@ export function toMapMarkers(hospitals: Hospital[]): MapMarker[] {
 /**
  * 앱(WebView)과 웹이 똑같이 쓰는 지도 로직입니다.
  *
- * 이 스크립트는 전역 함수 세 개만 만들어 두고, 바깥에서 호출해 쓰게 되어 있습니다.
+ * 이 스크립트는 전역 함수 네 개만 만들어 두고, 바깥에서 호출해 쓰게 되어 있습니다.
  *   __initMap({ lat, lng, level })      지도 생성
  *   __renderHospitals(markers, id)      마커 다시 그리기 (선택된 마커는 큰 핀)
  *   __moveTo(lat, lng)                  중심 이동
+ *   __zoomBy(delta)                     확대(+)/축소(-) — 지도 위 버튼용
  *
  * 바깥으로 나가는 연락은 __postMapMessage(json) 하나로 통일했습니다.
  * 앱은 이걸 ReactNativeWebView.postMessage 에, 웹은 콜백에 연결합니다.
@@ -156,6 +157,56 @@ export const KAKAO_MAP_SCRIPT = `
     }
   };
 
+  // 트랙패드·마우스 휠 한 번에 몇 단계씩 튀지 않게 막는 간격. 트랙패드는 한 번 튕겨도 wheel 이 수십 번 옵니다.
+  var WHEEL_STEP_INTERVAL_MS = 150;
+  var MIN_LEVEL = 1;
+  var MAX_LEVEL = 14;
+
+  /**
+   * 휠·트랙패드 스크롤을 확대/축소로 잇습니다.
+   *
+   * 카카오 SDK 는 터치가 되는 환경(앱 WebView, 시뮬레이터, 아이패드)이라고 판단하면 wheel 을
+   * 아예 듣지 않아서, 트랙패드로 스크롤해도 지도가 꿈쩍하지 않습니다. 그래서 직접 붙입니다.
+   * 데스크톱 브라우저(웹)는 SDK 가 이미 휠 확대를 하므로 건너뜁니다 — 둘 다 붙으면 두 단계씩 뜁니다.
+   * 커서 위치를 기준으로 확대해야 보던 곳이 화면 밖으로 밀리지 않습니다.
+   */
+  function attachWheelZoom(element) {
+    if (!element || !('ontouchstart' in window)) return;
+
+    var lockedUntil = 0;
+    element.addEventListener('wheel', function (event) {
+      // 기본 동작(페이지 스크롤·브라우저 확대)을 막아야 지도만 움직입니다
+      event.preventDefault();
+      if (!map) return;
+
+      var now = Date.now();
+      if (now < lockedUntil) return;
+      lockedUntil = now + WHEEL_STEP_INTERVAL_MS;
+
+      var level = map.getLevel();
+      var next = event.deltaY > 0 ? level + 1 : level - 1;
+      if (next < MIN_LEVEL || next > MAX_LEVEL || next === level) return;
+
+      var rect = element.getBoundingClientRect();
+      var point = new kakao.maps.Point(event.clientX - rect.left, event.clientY - rect.top);
+      var anchor = map.getProjection().coordsFromContainerPoint(point);
+      map.setLevel(next, { anchor: anchor });
+    }, { passive: false });
+  }
+
+  /**
+   * 지도 위 +/- 버튼에서 부릅니다. delta 가 양수면 확대, 음수면 축소.
+   * (카카오 level 은 숫자가 작을수록 확대라 부호를 뒤집습니다)
+   */
+  window.__zoomBy = function (delta) {
+    if (!map) return;
+    var next = map.getLevel() - delta;
+    if (next < MIN_LEVEL) next = MIN_LEVEL;
+    if (next > MAX_LEVEL) next = MAX_LEVEL;
+    if (next === map.getLevel()) return;
+    map.setLevel(next, { animate: true });
+  };
+
   window.__moveTo = function (lat, lng) {
     if (!map) return;
     movedProgrammaticallyAt = Date.now();
@@ -189,6 +240,8 @@ export const KAKAO_MAP_SCRIPT = `
         var next = map.getCenter();
         post({ type: 'moved', lat: next.getLat(), lng: next.getLng() });
       });
+
+      attachWheelZoom(document.getElementById('map'));
 
       var initial = pending || { list: [], selectedId: null };
       pending = null;
