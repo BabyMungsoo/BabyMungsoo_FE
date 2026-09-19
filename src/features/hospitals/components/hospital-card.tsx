@@ -108,11 +108,6 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
         </View>
       )}
 
-      {/* MRI·CT 보유, 전문 분야 같은 한 줄 소개. 칩으로 못 담는 문장형 정보라 따로 둡니다. */}
-      {!!hospital.features && (
-        <Text className="mt-2 text-xs leading-5 text-ink-muted">{hospital.features}</Text>
-      )}
-
       <View className="my-3 h-px bg-ink-line" />
 
       <View className="gap-1">

@@ -20,8 +20,6 @@ export interface Hospital {
   openHours: string | null;
   /** 주요 진료 분야. '24시 응급, CT/MRI, 정형외과' 처럼 쉼표로 이어진 문자열. 큐레이션 병원만 값이 있습니다 */
   specialties: string | null;
-  /** 특징 한 줄 (장비·강점). '대학병원급 MRI, CT 보유, 분과별 전문의 협진' 처럼 문장. 큐레이션 병원만 값이 있습니다 */
-  features: string | null;
   /** 카카오 미제공 — 현재 전부 null */
   rating: number | null;
   /** 리뷰 수 (시안의 평점 옆 '(256)') — 현재 전부 null */
