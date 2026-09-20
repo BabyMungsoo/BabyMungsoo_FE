@@ -58,6 +58,8 @@ export default function RootLayout() {
               <Stack.Screen name="find-id" />
               <Stack.Screen name="find-password" />
               <Stack.Screen name="triage/[sessionId]" />
+              <Stack.Screen name="health-tips/index" />
+              <Stack.Screen name="health-tips/[id]" />
               <Stack.Screen name="(tabs)" />
             </Stack>
           </View>
