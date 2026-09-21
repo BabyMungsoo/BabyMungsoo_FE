@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { OptionCardList } from '@/features/triage/components/option-card-list';
 import {
   useCompleteTriageSession,
   useNextQuestion,
@@ -12,6 +13,7 @@ import {
   useTriageSession,
 } from '@/hooks/queries/use-triage';
 import { notify } from '@/lib/confirm';
+import type { Question } from '@/types';
 
 /**
  * 맞춤형 추가 문진.
@@ -20,6 +22,14 @@ import { notify } from '@/lib/confirm';
  * 서버가 하나씩 돌려주므로 화면은 그걸 그대로 따라가기만 하면 됩니다
  * (질문 순서를 프론트가 관리하지 않습니다).
  * 질문이 떨어지면 세션을 완료하고 분석 화면으로 넘깁니다.
+ *
+ * 답변은 선택지 카드가 기본입니다(answerType = CHOICE). 응급 상황에서 문장을 칠 수 없어서
+ * 서버가 질문마다 선택지를 함께 만들어 줍니다. 선택지가 상황에 안 맞을 때를 위해
+ * '직접 입력' 을 작게 남겨 두고, 선택지가 없는 질문(TEXT)은 예전처럼 입력창만 보입니다.
+ *
+ * '선택 → 다음' 두 번 누르게 한 이유: 답변 수정 API 가 없어 잘못 누른 답을 되돌릴 수 없고,
+ * 그 답이 그대로 응급도 판단에 들어갑니다. 탭 한 번에 전송하는 쪽이 빠르긴 하지만
+ * 수정 API 가 생긴 뒤에 바꾸는 게 맞습니다.
  */
 export default function TriageQuestionScreen() {
   const router = useRouter();
@@ -36,9 +46,8 @@ export default function TriageQuestionScreen() {
   const questionSetQuery = useTriageQuestionSet(validId);
   const questions = questionSetQuery.data?.questions;
 
-  const [answer, setAnswer] = useState('');
-
   const question = nextQuestion.data ?? null;
+
   const answeredCount = session.data?.answers.length ?? 0;
   const totalCount = questions?.length ?? 0;
   const isBusy = saveAnswer.isPending || completeSession.isPending;
@@ -58,18 +67,12 @@ export default function TriageQuestionScreen() {
     }
   };
 
-  const handleNext = async () => {
-    const content = answer.trim();
-
-    if (!content) {
-      await notify('답변을 입력해주세요', '모르는 내용이면 "잘 모르겠어요"라고 적어도 괜찮아요.');
-      return;
-    }
+  const submitAnswer = async (content: string) => {
     if (question == null || validId == null) return;
 
     try {
+      // 선택지는 문구 그대로 보냅니다. 서버가 이 문자열을 '- 질문: 답변' 으로 분석 입력에 씁니다.
       await saveAnswer.mutateAsync({ questionId: question.id, content });
-      setAnswer('');
     } catch (err) {
       await notify(
         '답변을 저장하지 못했어요',
@@ -132,29 +135,18 @@ export default function TriageQuestionScreen() {
 
             {question ? (
               <>
-                <View className="rounded-2xl border-2 border-brand-300 bg-paper-card p-4">
-                  <Text className="text-base font-bold leading-6 text-ink">{question.content}</Text>
-                  <TextInput
-                    value={answer}
-                    onChangeText={setAnswer}
-                    placeholder="편하게 적어주세요"
-                    placeholderTextColor="#a9a296"
-                    multiline
-                    textAlignVertical="top"
-                    className="mt-3 h-20 text-sm text-ink"
-                  />
-                </View>
-
-                <Pressable
-                  onPress={handleNext}
-                  disabled={isBusy}
-                  accessibilityRole="button"
-                  className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
-                >
-                  <Text className="text-center text-base font-bold text-ink">
-                    {saveAnswer.isPending ? '저장 중...' : '다음'}
-                  </Text>
-                </Pressable>
+                {/*
+                  key 로 질문이 바뀔 때마다 새로 마운트합니다. 고른 선택지·적던 글이
+                  다음 질문에 딸려 가지 않게 하는 가장 단순한 방법입니다(effect 로 초기화하면
+                  렌더가 연쇄로 돕니다).
+                */}
+                <AnswerForm
+                  key={question.id}
+                  question={question}
+                  isBusy={isBusy}
+                  isSaving={saveAnswer.isPending}
+                  onSubmit={submitAnswer}
+                />
 
                 <Pressable onPress={goToAnalysis} disabled={isBusy} accessibilityRole="button">
                   <Text className="text-center text-sm text-ink-muted">
@@ -184,16 +176,18 @@ export default function TriageQuestionScreen() {
               </>
             )}
 
-            {/* 지금까지 답한 내용 — 되돌아보며 확인할 수 있게 */}
+            {/* 지금까지 답한 내용 — 답이 짧아졌으니 질문과 답을 한 줄에 둡니다 */}
             {answeredCount > 0 && (
-              <View className="gap-3 rounded-2xl bg-paper-card p-4">
+              <View className="gap-2.5 rounded-2xl bg-paper-card p-4">
                 <Text className="text-sm font-semibold text-ink-muted">지금까지 답한 내용</Text>
                 {session.data?.answers.map((item) => (
-                  <View key={item.id} className="gap-1">
-                    <Text className="text-xs text-ink-soft">
+                  <View key={item.id} className="flex-row items-start justify-between gap-3">
+                    <Text className="flex-1 text-xs leading-5 text-ink-soft">
                       {questions?.find((q) => q.id === item.questionId)?.content ?? '추가 설명'}
                     </Text>
-                    <Text className="text-sm text-ink">{item.content}</Text>
+                    <Text className="max-w-[45%] shrink text-right text-sm font-semibold leading-5 text-ink">
+                      {item.content}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -202,5 +196,98 @@ export default function TriageQuestionScreen() {
         )}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+interface AnswerFormProps {
+  question: Question;
+  isBusy: boolean;
+  isSaving: boolean;
+  onSubmit: (content: string) => void;
+}
+
+/**
+ * 질문 하나의 답변 폼. 선택지 카드가 기본이고, '직접 입력' 을 열면 카드 선택은 버립니다.
+ * 둘 다 있으면 무엇을 보낼지 애매해지기 때문입니다.
+ */
+function AnswerForm({ question, isBusy, isSaving, onSubmit }: AnswerFormProps) {
+  const isChoice = question.answerType === 'CHOICE' && question.options.length > 0;
+
+  const [selected, setSelected] = useState<string | null>(null);
+  const [freeText, setFreeText] = useState('');
+  // CHOICE 질문에서 '직접 입력' 을 펼쳤는지. TEXT 질문은 이 값과 무관하게 항상 입력창입니다.
+  const [showFreeText, setShowFreeText] = useState(false);
+
+  const useFreeText = !isChoice || showFreeText;
+  const content = useFreeText ? freeText.trim() : (selected ?? '');
+  const canSubmit = content.length > 0 && !isBusy;
+
+  const openFreeText = () => {
+    setSelected(null);
+    setShowFreeText(true);
+  };
+
+  const closeFreeText = () => {
+    setFreeText('');
+    setShowFreeText(false);
+  };
+
+  return (
+    <>
+      <View className="gap-4 rounded-2xl border-2 border-brand-300 bg-paper-card p-4">
+        <Text className="text-lg font-bold leading-7 text-ink">{question.content}</Text>
+
+        {isChoice && (
+          <OptionCardList
+            options={question.options}
+            selected={selected}
+            onSelect={(option) => {
+              setSelected(option);
+              // 카드를 골랐으면 직접 입력은 접습니다.
+              if (showFreeText) closeFreeText();
+            }}
+            disabled={isBusy}
+          />
+        )}
+
+        {useFreeText && (
+          <TextInput
+            value={freeText}
+            onChangeText={setFreeText}
+            placeholder={isChoice ? '상황을 직접 적어주세요' : '편하게 적어주세요'}
+            placeholderTextColor="#a9a296"
+            multiline
+            textAlignVertical="top"
+            autoFocus={isChoice}
+            className="min-h-[80px] rounded-xl bg-paper px-3 py-2 text-sm text-ink"
+          />
+        )}
+
+        {isChoice && (
+          <Pressable
+            onPress={showFreeText ? closeFreeText : openFreeText}
+            disabled={isBusy}
+            accessibilityRole="button"
+            className="self-start"
+          >
+            <Text className="text-xs text-ink-muted underline">
+              {showFreeText ? '선택지에서 고를래요' : '해당하는 게 없어요 · 직접 입력할래요'}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+
+      <Pressable
+        onPress={() => onSubmit(content)}
+        disabled={!canSubmit}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canSubmit }}
+        className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-40"
+      >
+        <Text className="text-center text-base font-bold text-ink">
+          {isSaving ? '저장 중...' : '다음'}
+        </Text>
+      </Pressable>
+    </>
   );
 }
