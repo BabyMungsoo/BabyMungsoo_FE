@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { Linking, Pressable, Text, View } from 'react-native';
 
 import { HOSPITAL_TAG_LABEL, toHospitalTags } from '@/constants/hospital';
+import { callHospital } from '@/features/hospitals/phone';
 import { isMissing, type Hospital } from '@/types';
 
 interface HospitalCardProps {
@@ -22,9 +23,7 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
   const tags = toHospitalTags(hospital.tags);
 
   function handleCall() {
-    if (!phone) return;
-    // 하이픈·공백이 섞여 있어도 걸리도록 숫자와 + 만 남깁니다
-    Linking.openURL(`tel:${phone.replace(/[^0-9+]/g, '')}`);
+    callHospital(phone);
   }
 
   function handleDirections() {

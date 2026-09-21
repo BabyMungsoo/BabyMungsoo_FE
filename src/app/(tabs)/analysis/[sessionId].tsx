@@ -6,12 +6,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { toAbsoluteUrl } from '@/api';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { AnalyzingView } from '@/features/analysis/components/analyzing-view';
-import { ResultView, type QuickGuideKey } from '@/features/analysis/components/result-view';
+import { ResultView } from '@/features/analysis/components/result-view';
 import { useFakeProgress } from '@/features/analysis/use-fake-progress';
+import { NearbyHospitalList } from '@/features/hospitals/components/nearby-hospital-list';
 import { toRecordCreateRequest } from '@/features/records/to-record-create-request';
+import { toTriageLevel } from '@/constants/triage';
 import { useCreateRecord } from '@/hooks/queries/use-records';
 import { useTriageAnalysis, useTriageSession } from '@/hooks/queries/use-triage';
-import { confirm } from '@/lib/confirm';
 import { useCurrentUserId } from '@/stores/use-session-store';
 
 /** 게이지가 100% 를 채우는 걸 보여준 뒤 결과로 넘깁니다 */
@@ -82,14 +83,6 @@ export default function AnalysisScreen() {
   // (effect 안에서 setShowResult(false) 를 호출하면 렌더가 연쇄로 다시 돕니다)
   const canShowResult = isReady && showResult;
 
-  async function handleQuickGuide(_key: QuickGuideKey) {
-    // TODO: 건강 가이드 화면(피그마 5번)이 생기면 해당 상세로 연결합니다.
-    await confirm({
-      title: '준비 중인 기능입니다',
-      message: '가이드 화면은 곧 추가될 예정이에요.',
-    });
-  }
-
   if (validId == null) {
     return <ErrorScreen message="잘못된 접근입니다. 홈에서 다시 시작해 주세요." />;
   }
@@ -114,10 +107,24 @@ export default function AnalysisScreen() {
         photoUrls={photoUrls}
         // 증상부터 다시 입력해야 새 세션이 만들어지므로 홈으로 보냅니다.
         onPressRetry={() => router.replace('/')}
-        onPressQuickGuide={handleQuickGuide}
         // 응급도를 넘겨야 9번에서 그 등급에 맞는 병원을 추천받습니다(7번 상세와 같은 방식).
         onPressFindHospital={() =>
           router.push({ pathname: '/hospitals', params: { level: result.level } })
+        }
+        nearbyHospitals={
+          <NearbyHospitalList
+            level={toTriageLevel(result.level)}
+            // 항목을 누르면 지도가 그 병원을 선택한 채로 열립니다
+            onPressHospital={(hospitalId) =>
+              router.push({
+                pathname: '/hospitals',
+                params: { level: result.level, hospitalId: String(hospitalId) },
+              })
+            }
+            onPressMore={() =>
+              router.push({ pathname: '/hospitals', params: { level: result.level } })
+            }
+          />
         }
       />
     );

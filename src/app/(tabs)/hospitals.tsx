@@ -14,13 +14,18 @@ import type { HospitalRecommendParams, LatLng } from '@/types';
  *
  * 7번 상세의 '병원 찾기' 에서 분석기록의 응급도를 level 로 넘겨 받습니다.
  * 탭에서 바로 들어오면 응급도가 없으니 반경 전체(NORMAL)를 보여줍니다.
+ * 4번 결과의 '가까운 동물병원' 목록에서 오면 hospitalId 도 함께 와서 그 병원 카드가 열린 채 시작합니다.
  */
 export default function HospitalsScreen() {
   const router = useRouter();
-  const { level } = useLocalSearchParams<{ level?: string }>();
+  // hospitalId 는 결과 화면(4번)의 '가까운 동물병원' 목록에서 한 곳을 누르고 들어올 때 옵니다.
+  const { level, hospitalId } = useLocalSearchParams<{ level?: string; hospitalId?: string }>();
 
   const { center, isRealLocation, status, retry: retryLocation } = useCurrentLocation();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(() => {
+    const parsed = Number(hospitalId);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  });
   const [mapErrored, setMapErrored] = useState(false);
   // '24시간' 필터. 켜면 24시간 진료 병원만 지도에 남깁니다.
   const [only24h, setOnly24h] = useState(false);
