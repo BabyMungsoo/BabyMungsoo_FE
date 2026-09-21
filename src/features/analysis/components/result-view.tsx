@@ -1,25 +1,26 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PhotoStrip } from '@/components/ui/photo-strip';
+import { TriageBadge } from '@/components/ui/triage-badge';
 import { toTriageLevel } from '@/constants/triage';
 import type { TriageAnalyzeResult, TriageLevel } from '@/types';
 
-/** 경고 박스는 응급도에 따라 색만 바뀌고 문구는 서버의 guide 를 그대로 씁니다. */
-const WARNING_STYLE: Record<TriageLevel, { bg: string; fg: string }> = {
-  IMMEDIATE: { bg: '#fdecec', fg: '#b02525' },
-  WATCH: { bg: '#fdf4e0', fg: '#8a6800' },
-  NORMAL: { bg: '#eef7ea', fg: '#3f6b31' },
+/** 등급 배너 색. 배경은 옅게, 글자는 진하게 — 같은 계열이라 뱃지(bg-triage-*)와 어울립니다. */
+const LEVEL_STYLE: Record<TriageLevel, { bg: string; fg: string; border: string }> = {
+  IMMEDIATE: { bg: '#fdecec', fg: '#b02525', border: '#e03131' },
+  WATCH: { bg: '#fdf4e0', fg: '#8a6800', border: '#e0a800' },
+  NORMAL: { bg: '#eef7ea', fg: '#3f6b31', border: '#74b85a' },
 };
 
-/** 범례는 서버 데이터가 아니라 항상 같은 설명이라 화면에 고정합니다. */
-const LEGEND: { level: TriageLevel; color: string; text: string }[] = [
-  { level: 'IMMEDIATE', color: '#e03131', text: '응급 상황 (즉시 병원 방문 필요)' },
-  { level: 'WATCH', color: '#e0a800', text: '주의 상황 (검사·관찰 필요)' },
-  { level: 'NORMAL', color: '#74b85a', text: '경미한 상황' },
-];
+/** '왜'의 제목. 등급마다 묻는 말이 달라서 서버 문구가 아니라 화면에 둡니다. */
+const WHY_TITLE: Record<TriageLevel, string> = {
+  IMMEDIATE: '왜 지금 가야 하나요',
+  WATCH: '왜 진료가 필요한가요',
+  NORMAL: '왜 괜찮은가요',
+};
 
 interface ResultViewProps {
   result: TriageAnalyzeResult;
@@ -43,10 +44,13 @@ interface ResultViewProps {
 /**
  * 4번 — 응급 상황 판단 결과. 서버 호출을 모르는 순수 표현 컴포넌트입니다.
  *
- * 결론(result.title, 예: '위장염(급성) 가능성 높음')은 의도적으로 표시하지 않습니다.
- * 4번은 '지금 뭘 해야 하나', 7번(분석기록 상세)은 '뭐였더라' 로 목적이 나뉘어 있고,
- * 병명 추정을 응급 화면 맨 위에 두면 병원에 가는 판단보다 병명에 주의가 쏠립니다.
- * 결론은 7번에서 응급도 뱃지와 함께 보여 줍니다.
+ * 위에서 아래로 읽으면 결론 → 소견 → 이유 → 조건 → 주의 순입니다. 보호자가 첫 화면에서
+ * 알아야 하는 건 "지금 병원에 가야 하나" 하나라, 그 답(result.title)을 등급 색 배너로
+ * 맨 위에 두고 나머지는 그 근거로 내려갑니다. 방금 입력한 증상은 결과가 아니라 접어서
+ * 맨 아래로 보냈습니다.
+ *
+ * result.title 은 서버가 등급에서 만든 고정 문구입니다(예: '지금 바로 동물병원에 가세요').
+ * 예전엔 모델이 쓴 병명 추정이 들어와 숨겼는데, 이제는 시급성 결론이라 맨 위에 둡니다.
  */
 export function ResultView({
   result,
@@ -56,11 +60,11 @@ export function ResultView({
   onPressFindHospital,
   nearbyHospitals,
 }: ResultViewProps) {
-  const level = toTriageLevel(result.level);
-  const warning = level ? WARNING_STYLE[level] : WARNING_STYLE.NORMAL;
+  const level = toTriageLevel(result.level) ?? 'NORMAL';
+  const style = LEVEL_STYLE[level];
+  const isImmediate = level === 'IMMEDIATE';
 
-  // 시안의 요약 불릿에 대응하는 데이터가 서버에 따로 없어, 사용자가 쉼표로 나눠 적은
-  // 증상을 그대로 항목화합니다. 쉼표가 없으면 본문만 보여 줍니다.
+  const [showInput, setShowInput] = useState(false);
   const symptomItems = splitSymptoms(initialSymptom);
 
   return (
@@ -70,100 +74,183 @@ export function ResultView({
       </View>
 
       <View className="flex-1 bg-paper">
-        <ScrollView contentContainerClassName="gap-5 px-5 pb-8 pt-5">
-          <View className="gap-2">
-            <Text className="text-base font-bold text-ink">증상 요약</Text>
-            <View className="gap-3 rounded-2xl border border-brand-300 bg-paper-card p-4">
-              {/* 사진을 글보다 위에 둡니다 — 7번(분석기록 상세)의 배치와 같게 맞췄습니다 */}
-              <PhotoStrip photoUrls={photoUrls} />
-
-              <Text className="text-sm leading-6 text-ink">{initialSymptom}</Text>
-
-              {symptomItems.length > 1 && (
-                <View className="gap-1.5">
-                  {symptomItems.map((item) => (
-                    <View key={item} className="flex-row gap-2">
-                      <Text className="text-sm leading-5 text-ink-muted">•</Text>
-                      <Text className="flex-1 text-sm leading-5 text-ink">{item}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
+        <ScrollView contentContainerClassName="gap-4 px-5 pb-8 pt-5">
+          {/* 결론 배너 — 이 화면에서 유일하게 큰 글씨입니다 */}
+          <View
+            className="gap-3 rounded-2xl border-2 p-4"
+            style={{ backgroundColor: style.bg, borderColor: style.border }}
+          >
+            <View className="flex-row items-center">
+              <TriageBadge level={level} variant="long" />
             </View>
+            <Text className="text-xl font-bold leading-7" style={{ color: style.fg }}>
+              {result.title}
+            </Text>
+
+            {/*
+              IMMEDIATE 는 스크롤 없이 첫 화면에서 병원으로 가는 길이 보여야 해서
+              버튼을 배너 안에 둡니다. 다른 등급은 아래 행동 카드에 있습니다.
+            */}
+            {isImmediate && (
+              <Pressable
+                onPress={onPressFindHospital}
+                accessibilityRole="button"
+                className="flex-row items-center justify-center gap-1.5 rounded-2xl bg-triage-immediate py-4 active:opacity-70"
+              >
+                <Ionicons name="location" size={18} color="#ffffff" />
+                <Text className="text-base font-bold text-white">병원 찾기</Text>
+              </Pressable>
+            )}
           </View>
 
-          {!!result.guide && (
-            <View className="rounded-2xl p-4" style={{ backgroundColor: warning.bg }}>
-              <Text className="text-sm font-bold leading-6" style={{ color: warning.fg }}>
-                {result.guide}
-              </Text>
+          {result.findings.length > 0 && (
+            <Section title="확인된 소견">
+              <BulletList items={result.findings} />
+            </Section>
+          )}
+
+          {!!result.urgencyReason && (
+            <Section title={WHY_TITLE[level]}>
+              <Text className="text-sm leading-6 text-ink">{result.urgencyReason}</Text>
+            </Section>
+          )}
+
+          {/*
+            "지금은 이 등급이지만 이게 보이면 즉시" 라는 조건이라 등급과 무관하게 빨강입니다.
+            WATCH 의 노란 카드 안에 노란 불릿이면 본문과 구분이 안 됩니다.
+            IMMEDIATE 는 서버가 항상 빈 배열로 주므로 이 섹션이 나오지 않습니다.
+          */}
+          {result.escalationSigns.length > 0 && (
+            <View
+              className="gap-2.5 rounded-2xl border p-4"
+              style={{
+                backgroundColor: LEVEL_STYLE.IMMEDIATE.bg,
+                borderColor: LEVEL_STYLE.IMMEDIATE.border,
+              }}
+            >
+              <View className="flex-row items-center gap-1.5">
+                <Ionicons name="alert-circle" size={18} color={LEVEL_STYLE.IMMEDIATE.fg} />
+                <Text className="text-base font-bold" style={{ color: LEVEL_STYLE.IMMEDIATE.fg }}>
+                  이럴 땐 바로 병원으로
+                </Text>
+              </View>
+              <BulletList items={result.escalationSigns} color={LEVEL_STYLE.IMMEDIATE.fg} />
             </View>
           )}
 
-          <View className="gap-4 rounded-2xl bg-paper-card p-4">
-            <View className="gap-2.5">
-              <Text className="text-base font-bold text-ink">가이드</Text>
-              {LEGEND.map((item) => (
-                <View key={item.level} className="flex-row items-center gap-2.5">
-                  <View
-                    className="h-3.5 w-3.5 rounded-full border-2"
-                    style={{ borderColor: item.color }}
-                  />
-                  <Text
-                    className={`text-sm ${level === item.level ? 'font-bold text-ink' : 'text-ink-muted'}`}
-                  >
-                    {item.text}
-                  </Text>
-                </View>
-              ))}
-            </View>
+          {result.precautions.length > 0 && (
+            <Section title="병원 가기 전까지" muted>
+              <BulletList items={result.precautions} muted />
+            </Section>
+          )}
 
-            <View className="flex-row gap-3">
-              {/*
-                이번 이슈(#5)는 UI 까지만 만듭니다. 걸 번호와 연결 방식(119 / 병원 직통 /
-                보호자가 등록한 번호)이 정해지지 않아 동작을 붙이지 않았습니다.
-                정해지면 여기에 onPress 를 다시 넣으면 됩니다.
-              */}
+          {/*
+            행동 카드. 전화는 아래 '가까운 동물병원' 목록에서 병원별로 걸므로
+            여기엔 두지 않습니다 (예전의 '응급모드 전화' 자리표시는 뺐습니다).
+          */}
+          <View className="gap-3 rounded-2xl bg-paper-card p-4">
+            {!isImmediate && (
               <Pressable
-                disabled
+                onPress={onPressFindHospital}
                 accessibilityRole="button"
-                accessibilityState={{ disabled: true }}
-                className="flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-triage-immediate py-3.5"
+                className="flex-row items-center justify-center gap-1.5 rounded-2xl bg-brand-400 py-4 active:opacity-70"
               >
-                <Ionicons name="call" size={16} color="#ffffff" />
-                <Text className="text-sm font-bold text-white">응급모드 전화</Text>
+                <Ionicons name="location" size={18} color="#5c4408" />
+                <Text className="text-base font-bold text-brand-900">병원 찾기</Text>
               </Pressable>
+            )}
 
-              <Pressable
-                onPress={onPressRetry}
-                accessibilityRole="button"
-                className="flex-1 items-center justify-center rounded-2xl bg-paper-chip py-3.5 active:opacity-70"
-              >
-                <Text className="text-sm font-bold text-ink-muted">다시 진단하기</Text>
-              </Pressable>
-            </View>
-
-            {/*
-              결과를 본 직후가 병원을 찾는 시점이라 여기에 둡니다. 지금까지는 이 버튼이 없어
-              분석기록 목록·상세를 거쳐야 지도로 갈 수 있었습니다.
-              스타일은 7번(분석기록 상세)의 같은 버튼과 맞췄습니다.
-            */}
             <Pressable
-              onPress={onPressFindHospital}
+              onPress={onPressRetry}
               accessibilityRole="button"
-              className="flex-row items-center justify-center gap-1.5 rounded-2xl bg-brand-400 py-4 active:opacity-70"
+              className="items-center justify-center rounded-2xl bg-paper-chip py-3.5 active:opacity-70"
             >
-              <Ionicons name="location" size={18} color="#5c4408" />
-              <Text className="text-base font-bold text-brand-900">병원 찾기</Text>
+              <Text className="text-sm font-bold text-ink-muted">다시 진단하기</Text>
             </Pressable>
           </View>
 
-          {/* 예전의 '빠른 행동 가이드'(동작 없는 자리표시) 자리. 결과를 본 직후가
-              병원에 전화하는 순간이라 가까운 병원 3곳을 여기 둡니다. */}
+          {/* 입력한 증상 — 결과가 아니라 접어 둡니다. 사진은 여기서만 보입니다. */}
+          <View className="rounded-2xl border border-brand-300 bg-paper-card">
+            <Pressable
+              onPress={() => setShowInput((prev) => !prev)}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: showInput }}
+              className="flex-row items-center justify-between p-4 active:opacity-70"
+            >
+              <Text className="text-sm font-semibold text-ink-muted">
+                입력한 증상{photoUrls.length > 0 ? ` · 사진 ${photoUrls.length}장` : ''}
+              </Text>
+              <Ionicons
+                name={showInput ? 'chevron-up' : 'chevron-down'}
+                size={18}
+                color="#8c867a"
+              />
+            </Pressable>
+
+            {showInput && (
+              <View className="gap-3 px-4 pb-4">
+                <PhotoStrip photoUrls={photoUrls} />
+                <Text className="text-sm leading-6 text-ink">{initialSymptom}</Text>
+                {symptomItems.length > 1 && <BulletList items={symptomItems} />}
+              </View>
+            )}
+          </View>
+
+          {/* 결과를 본 직후가 병원에 전화하는 순간이라 가까운 병원 3곳을 여기 둡니다. */}
           {nearbyHospitals}
         </ScrollView>
       </View>
     </SafeAreaView>
+  );
+}
+
+function Section({
+  title,
+  muted = false,
+  children,
+}: {
+  title: string;
+  /** 주의 사항처럼 가장 약하게 보여야 하는 섹션 */
+  muted?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <View className="gap-2.5 rounded-2xl bg-paper-card p-4">
+      <Text className={`text-base font-bold ${muted ? 'text-ink-muted' : 'text-ink'}`}>
+        {title}
+      </Text>
+      {children}
+    </View>
+  );
+}
+
+function BulletList({
+  items,
+  color,
+  muted = false,
+}: {
+  items: string[];
+  /** 불릿과 글자 색을 함께 바꿀 때 (악화 신호) */
+  color?: string;
+  muted?: boolean;
+}) {
+  const textClass = muted ? 'text-ink-muted' : 'text-ink';
+  return (
+    <View className="gap-1.5">
+      {items.map((item) => (
+        <View key={item} className="flex-row gap-2">
+          <Text className={`text-sm leading-6 ${textClass}`} style={color ? { color } : undefined}>
+            •
+          </Text>
+          <Text
+            className={`flex-1 text-sm leading-6 ${textClass}`}
+            style={color ? { color } : undefined}
+          >
+            {item}
+          </Text>
+        </View>
+      ))}
+    </View>
   );
 }
 
