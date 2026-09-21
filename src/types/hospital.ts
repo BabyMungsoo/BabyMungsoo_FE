@@ -54,6 +54,12 @@ export interface HospitalRecommendParams {
   level: HospitalLevel;
 }
 
+/** GET /api/v1/hospitals/nearest 쿼리 파라미터 — 반경 없이 가까운 순 limit 곳 */
+export interface HospitalNearestParams extends HospitalRecommendParams {
+  /** 기본 3, 최대 20 */
+  limit?: number;
+}
+
 /** 위경도 한 쌍 */
 export interface LatLng {
   lat: number;

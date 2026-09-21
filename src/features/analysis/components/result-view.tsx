@@ -1,36 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PhotoStrip } from '@/components/ui/photo-strip';
 import { toTriageLevel } from '@/constants/triage';
 import type { TriageAnalyzeResult, TriageLevel } from '@/types';
-
-const QUICK_GUIDES = [
-  {
-    key: 'transport',
-    label: '긴급 이송\n가이드',
-    icon: 'car-outline',
-    bg: '#fdecec',
-    fg: '#c92a2a',
-  },
-  {
-    key: 'firstAid',
-    label: '응급 처치\n방법',
-    icon: 'medkit-outline',
-    bg: '#ecedf4',
-    fg: '#4c5a86',
-  },
-  {
-    key: 'checklist',
-    label: '자가 체크\n리스트',
-    icon: 'clipboard-outline',
-    bg: '#eef7ea',
-    fg: '#4a7c39',
-  },
-] as const;
-
-export type QuickGuideKey = (typeof QUICK_GUIDES)[number]['key'];
 
 /** 경고 박스는 응급도에 따라 색만 바뀌고 문구는 서버의 guide 를 그대로 씁니다. */
 const WARNING_STYLE: Record<TriageLevel, { bg: string; fg: string }> = {
@@ -56,9 +31,13 @@ interface ResultViewProps {
    */
   photoUrls?: string[];
   onPressRetry: () => void;
-  onPressQuickGuide: (key: QuickGuideKey) => void;
   /** 9번 지도로 이동. 결과의 응급도를 함께 넘겨 그 등급에 맞는 병원을 받습니다 */
   onPressFindHospital: () => void;
+  /**
+   * 맨 아래 '가까운 동물병원' 영역. 이 컴포넌트는 서버를 모르므로 라우트가
+   * NearbyHospitalList 를 만들어 넘깁니다 (멘토 피드백: 결과 화면에서 바로 전화).
+   */
+  nearbyHospitals?: ReactNode;
 }
 
 /**
@@ -74,8 +53,8 @@ export function ResultView({
   initialSymptom,
   photoUrls = [],
   onPressRetry,
-  onPressQuickGuide,
   onPressFindHospital,
+  nearbyHospitals,
 }: ResultViewProps) {
   const level = toTriageLevel(result.level);
   const warning = level ? WARNING_STYLE[level] : WARNING_STYLE.NORMAL;
@@ -179,25 +158,9 @@ export function ResultView({
             </Pressable>
           </View>
 
-          <View className="gap-2">
-            <Text className="text-base font-bold text-ink">빠른 행동 가이드</Text>
-            <View className="flex-row gap-3">
-              {QUICK_GUIDES.map((guide) => (
-                <Pressable
-                  key={guide.key}
-                  onPress={() => onPressQuickGuide(guide.key)}
-                  accessibilityRole="button"
-                  className="flex-1 items-center gap-2 rounded-2xl py-4 active:opacity-70"
-                  style={{ backgroundColor: guide.bg }}
-                >
-                  <Ionicons name={guide.icon} size={28} color={guide.fg} />
-                  <Text className="text-center text-xs font-bold leading-4 text-ink">
-                    {guide.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
+          {/* 예전의 '빠른 행동 가이드'(동작 없는 자리표시) 자리. 결과를 본 직후가
+              병원에 전화하는 순간이라 가까운 병원 3곳을 여기 둡니다. */}
+          {nearbyHospitals}
         </ScrollView>
       </View>
     </SafeAreaView>

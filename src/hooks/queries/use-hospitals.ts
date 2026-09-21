@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { hospitalsApi } from '@/api';
 import { recommendHospitals } from '@/features/hospitals/recommend-hospitals';
 import { queryKeys } from '@/lib/query-keys';
-import type { HospitalRecommendParams } from '@/types';
+import type { HospitalNearestParams, HospitalRecommendParams } from '@/types';
 
 /**
  * GET /hospitals/recommend — 현재 위치 반경 약 5km 병원.
@@ -23,5 +23,17 @@ export function useHospital(hospitalId: number | undefined) {
     queryKey: queryKeys.hospitals.detail(hospitalId!),
     queryFn: () => hospitalsApi.detail(hospitalId!),
     enabled: hospitalId != null,
+  });
+}
+
+/**
+ * GET /hospitals/nearest — 반경 없이 가까운 순 limit 곳 (결과 화면의 '가까운 동물병원').
+ * params 가 없으면(위치를 아직 못 받았으면) 요청하지 않습니다.
+ */
+export function useNearestHospitals(params: HospitalNearestParams | undefined) {
+  return useQuery({
+    queryKey: queryKeys.hospitals.nearest(params!),
+    queryFn: () => hospitalsApi.nearest(params!),
+    enabled: params != null,
   });
 }

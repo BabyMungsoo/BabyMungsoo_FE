@@ -1,4 +1,4 @@
-import type { HospitalRecommendParams, PageParams } from '@/types';
+import type { HospitalNearestParams, HospitalRecommendParams, PageParams } from '@/types';
 
 /**
  * 쿼리 키를 한곳에 모아 둡니다.
@@ -32,6 +32,7 @@ export const queryKeys = {
     list: () => ['hospitals', 'list'] as const,
     detail: (hospitalId: number) => ['hospitals', 'detail', hospitalId] as const,
     recommend: (params: HospitalRecommendParams) => ['hospitals', 'recommend', params] as const,
+    nearest: (params: HospitalNearestParams) => ['hospitals', 'nearest', params] as const,
   },
   records: {
     all: ['records'] as const,
