@@ -5,7 +5,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { distanceKm, formatDistance } from '@/features/hospitals/distance';
 import { callHospital } from '@/features/hospitals/phone';
 import { toHospitalLevel } from '@/features/hospitals/to-hospital-level';
-import { useRecommendedHospitals } from '@/hooks/queries/use-hospitals';
+import { useNearestHospitals } from '@/hooks/queries/use-hospitals';
 import { useCurrentLocation } from '@/hooks/use-current-location';
 import { isMissing, type Hospital, type TriageLevel } from '@/types';
 
@@ -27,8 +27,9 @@ interface NearbyHospitalListProps {
  * 멘토 피드백: 결과를 본 직후가 병원에 전화하는 순간인데, 지도까지 들어가서 핀을 눌러야
  * 번호가 보였다. 여기서 바로 걸 수 있게 전화 버튼을 항목마다 둡니다.
  *
- * 위치와 응급도로 /hospitals/recommend 를 받아 직선 거리순으로 자릅니다.
- * 서버가 거리순 정렬을 해 주지 않아 화면에서 잽니다.
+ * 위치와 응급도로 /hospitals/nearest 를 받습니다. recommend(5km 박스)와 달리 반경이 없어
+ * 교외에서도 늘 가까운 순 3곳이 나옵니다 — 멀어도 "가장 가까운 곳"이 응급엔 필요합니다.
+ * 서버가 이미 거리순으로 주지만 표시할 거리(850m 같은)는 화면에서 잽니다.
  */
 export function NearbyHospitalList({
   level,
@@ -42,22 +43,25 @@ export function NearbyHospitalList({
     () =>
       status === 'loading'
         ? undefined
-        : { lat: center.lat, lng: center.lng, level: toHospitalLevel(level) },
+        : { lat: center.lat, lng: center.lng, level: toHospitalLevel(level), limit: MAX_ITEMS },
     [status, center.lat, center.lng, level],
   );
 
-  const { data, isPending, error, refetch } = useRecommendedHospitals(params);
+  const { data, isPending, error, refetch } = useNearestHospitals(params);
 
-  const nearest = useMemo(() => {
-    const list = data?.hospitals ?? [];
-    return list
-      .map((hospital) => ({
+  // 서버가 가까운 순으로 주므로 순서는 믿고, 표시용 거리만 붙입니다
+  const nearest = useMemo(
+    () =>
+      (data ?? []).map((hospital) => ({
         hospital,
         km: distanceKm(center, { lat: hospital.latitude, lng: hospital.longitude }),
-      }))
-      .sort((a, b) => a.km - b.km)
-      .slice(0, MAX_ITEMS);
-  }, [data?.hospitals, center]);
+      })),
+    [data, center],
+  );
+
+  // IMMEDIATE 로 물었는데 24시간 병원이 하나도 안 왔으면 서버가 전체로 폴백한 것입니다
+  const fellBackToNormal =
+    level === 'IMMEDIATE' && nearest.length > 0 && !nearest.some((item) => item.hospital.is24hour);
 
   return (
     <View className="gap-2">
@@ -74,7 +78,7 @@ export function NearbyHospitalList({
           위치를 확인하지 못해 서울시청 주변을 보여드려요.
         </Text>
       )}
-      {data?.fellBackToNormal && (
+      {fellBackToNormal && (
         <Text className="text-xs text-ink-soft">
           24시간 병원 정보가 아직 없어 주변 병원을 보여드려요.
         </Text>
@@ -97,7 +101,7 @@ export function NearbyHospitalList({
 
       {!isPending && !error && nearest.length === 0 && (
         <View className="rounded-2xl bg-paper-card px-4 py-4">
-          <Text className="text-sm text-ink-muted">주변 5km 안에 등록된 동물병원이 없어요.</Text>
+          <Text className="text-sm text-ink-muted">등록된 동물병원이 아직 없어요.</Text>
         </View>
       )}
 
