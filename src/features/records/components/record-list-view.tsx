@@ -1,5 +1,6 @@
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 
+import { AiDisclaimer } from '@/components/ui/ai-disclaimer';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { RecordCard } from '@/features/records/components/record-card';
 import { TriageFilter } from '@/features/records/components/triage-filter';
@@ -42,6 +43,8 @@ export function RecordListView({
         renderItem={({ item }) => <RecordCard record={item} onPress={onPressRecord} />}
         contentContainerClassName="px-5 pb-6"
         showsVerticalScrollIndicator={false}
+        // 카드마다 반복하지 않고 화면당 한 번. 기록이 없어도 보입니다
+        ListHeaderComponent={<AiDisclaimer variant="compact" className="pb-3" />}
         refreshControl={
           onRetry ? <RefreshControl refreshing={isRefetching} onRefresh={onRetry} /> : undefined
         }

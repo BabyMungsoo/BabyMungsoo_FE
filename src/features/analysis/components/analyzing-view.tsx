@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AiDisclaimer } from '@/components/ui/ai-disclaimer';
 import { ScreenHeader } from '@/components/ui/screen-header';
 
 import { ProgressRing } from './progress-ring';
@@ -50,6 +51,8 @@ export function AnalyzingView({ percent }: AnalyzingViewProps) {
         <View className="items-center gap-1">
           <Text className="text-base font-bold text-ink">증상을 분석하고 있어요.</Text>
           <Text className="text-sm text-ink-muted">잠시만 기다려주세요.</Text>
+          {/* 결과가 나오기 전에 먼저 읽히게 여기에도 둡니다 */}
+          <AiDisclaimer variant="compact" className="mt-2" />
         </View>
 
         <View className="w-full rounded-2xl bg-paper-card px-4">

@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AiDisclaimer } from '@/components/ui/ai-disclaimer';
 import { PhotoStrip } from '@/components/ui/photo-strip';
 import { TriageBadge } from '@/components/ui/triage-badge';
 import { toTriageLevel } from '@/constants/triage';
@@ -102,6 +103,9 @@ export function ResultView({
               </Pressable>
             )}
           </View>
+
+          {/* 배너와 같은 첫 화면에 들어오게 소견보다 위에 둡니다 */}
+          <AiDisclaimer />
 
           {result.findings.length > 0 && (
             <Section title="확인된 소견">
