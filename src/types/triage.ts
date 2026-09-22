@@ -4,13 +4,22 @@ import type { Media } from './media';
 export const SESSION_STATUSES = ['IN_PROGRESS', 'COMPLETED'] as const;
 export type SessionStatus = (typeof SESSION_STATUSES)[number];
 
+/** CHOICE = options 중 하나를 고름, TEXT = 자유 입력. 시드된 마스터 질문은 항상 TEXT 입니다 */
+export type AnswerType = 'CHOICE' | 'TEXT';
+
 /** QuestionResponse */
 export interface Question {
   id: number;
   code: string;
   content: string;
-  symptomCategory: string;
+  symptomCategory: string | null;
   orderNo: number;
+  answerType: AnswerType;
+  /**
+   * 화면에 보이는 순서 그대로(가벼운 것 → 심한 것). 마지막은 서버가 붙인 '잘 모르겠어요'.
+   * TEXT 면 빈 배열입니다.
+   */
+  options: string[];
 }
 
 /** AnswerResponse */
