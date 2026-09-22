@@ -19,6 +19,12 @@ interface RecordDetailViewProps {
   /** 이 기록에 달린 팔로우업 답변들 */
   visits?: HospitalVisit[];
   /**
+   * 방문 조회가 실패했을 때. 빈 목록과 구분해야 합니다 — 오류를 빈 목록으로 그리면
+   * 진료 이력이 있는 사용자가 기록이 없다고 오인합니다.
+   */
+  visitsError?: Error | null;
+  onRetryVisits?: () => void;
+  /**
    * "병원에 다녀오셨나요?" 질문 카드. 띄울지 말지는 시간·스누즈에 달려 있어
    * 라우트가 판단해 넘깁니다(이 컴포넌트는 서버도 저장소도 모릅니다).
    */
@@ -44,6 +50,8 @@ export function RecordDetailView({
   onPressShare,
   onPressFindHospital,
   visits = [],
+  visitsError,
+  onRetryVisits,
   followUpCard,
   onPressAddVisit,
   onPressDeleteVisit,
@@ -126,7 +134,20 @@ export function RecordDetailView({
         <View className="mt-4 gap-3 rounded-2xl bg-paper-card p-5">
           <Text className="text-base font-bold text-ink">진료 기록</Text>
 
-          {visits.length > 0 ? (
+          {visitsError ? (
+            <View className="gap-2">
+              <Text className="text-sm text-ink-muted">진료 기록을 불러오지 못했어요.</Text>
+              {onRetryVisits && (
+                <Pressable
+                  onPress={onRetryVisits}
+                  accessibilityRole="button"
+                  className="self-start"
+                >
+                  <Text className="text-xs font-semibold text-brand-700 underline">다시 시도</Text>
+                </Pressable>
+              )}
+            </View>
+          ) : visits.length > 0 ? (
             <VisitList visits={visits} onPressDelete={onPressDeleteVisit} />
           ) : (
             <Text className="text-sm text-ink-muted">아직 남긴 진료 기록이 없어요.</Text>

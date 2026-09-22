@@ -26,7 +26,7 @@ export default function RecordDetailScreen() {
   const { data: record, isPending, error, refetch } = useRecord(validId);
   const deleteRecord = useDeleteRecord();
 
-  const { data: visits } = useVisits(validId);
+  const { data: visits, error: visitsError, refetch: refetchVisits } = useVisits(validId);
   const createVisit = useCreateVisit(validId ?? 0);
   const deleteVisit = useDeleteVisit(validId ?? 0);
 
@@ -69,7 +69,16 @@ export default function RecordDetailScreen() {
       destructive: true,
     });
     if (!confirmed) return;
-    await deleteVisit.mutateAsync(visitId);
+
+    try {
+      await deleteVisit.mutateAsync(visitId);
+    } catch (e) {
+      // 알리지 않으면 지워지지 않은 기록이 그대로 남은 채 사용자는 지운 줄 압니다
+      await confirm({
+        title: '삭제하지 못했습니다',
+        message: e instanceof Error ? e.message : undefined,
+      });
+    }
   }
 
   const mediaQueries = useMediaList(record?.mediaIds);
@@ -161,6 +170,8 @@ export default function RecordDetailScreen() {
             })
           }
           visits={visits ?? []}
+          visitsError={visitsError}
+          onRetryVisits={() => void refetchVisits()}
           onPressAddVisit={() => router.push(`/records/${record.recordId}/visit`)}
           onPressDeleteVisit={handleDeleteVisit}
           followUpCard={
