@@ -76,10 +76,21 @@ export interface TriageAnalyzeResult {
   petId: number;
   /** TriageLevel 과 같은 값 (IMMEDIATE / WATCH / NORMAL) */
   level: string;
-  /** 짧은 결론 한 줄. 예: '위장염(급성) 가능성 높음' */
+  /**
+   * 결론 한 줄. 서버가 등급에서 만든 고정 문구라 같은 등급이면 항상 같습니다.
+   * 예: '지금 바로 동물병원에 가세요' (IMMEDIATE)
+   */
   title: string;
-  /** 그렇게 판단한 근거들 */
-  reason: string[];
-  guide: string;
+  /** 입력에서 확인된 소견. 2~4개, 각 40자 이내의 짧은 구절 */
+  findings: string[];
+  /** 소견이 왜 그 시급성으로 이어지는지. 1~2문장, 첫 문장이 결론 */
+  urgencyReason: string;
+  /**
+   * "이 변화가 보이면 바로 병원". 최대 4개.
+   * IMMEDIATE 는 이미 즉시 내원이라 서버가 항상 빈 배열로 줍니다.
+   */
+  escalationSigns: string[];
+  /** 병원 도착 전까지의 주의 사항. 0~2개, 없으면 빈 배열 */
+  precautions: string[];
   createdAt: IsoDateTime;
 }

@@ -22,7 +22,9 @@ export const TRIAGE_LEVEL_META: Record<
   WATCH: {
     label: '주의 관찰',
     shortLabel: '주의',
-    description: '상태를 지켜보다 나빠지면 병원에 가세요.',
+    // 서버의 WATCH 정의("빠른 시일 내 진료가 필요한 상태")와 같은 강도로 맞춥니다.
+    // "지켜보다 나빠지면" 은 그보다 약해서 보호자가 진료를 미루게 만들었습니다.
+    description: '빠른 시일 내 병원 진료가 필요해요.',
     className: 'bg-triage-watch',
   },
   NORMAL: {
