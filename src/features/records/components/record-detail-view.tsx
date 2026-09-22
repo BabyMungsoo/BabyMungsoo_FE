@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { AiDisclaimer } from '@/components/ui/ai-disclaimer';
 import { PhotoStrip } from '@/components/ui/photo-strip';
 import { TriageBadge } from '@/components/ui/triage-badge';
 import { TRIAGE_LEVEL_META, toTriageLevel } from '@/constants/triage';
@@ -63,6 +64,8 @@ export function RecordDetailView({
         <Text className="mt-2 text-xs text-ink-soft">
           분석일 {formatDateTime(record.createdAt)}
         </Text>
+
+        <AiDisclaimer className="mt-3" />
 
         {symptoms.length > 0 && (
           <Section title="주요 증상">
