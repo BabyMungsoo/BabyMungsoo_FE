@@ -1,14 +1,20 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { toAbsoluteUrl } from '@/api';
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { FollowUpCard } from '@/features/records/components/follow-up-card';
 import { RecordDetailView } from '@/features/records/components/record-detail-view';
+import { readSnoozedUntil, snooze } from '@/features/records/follow-up-snooze';
+import { shouldAskFollowUp } from '@/features/records/should-ask-follow-up';
 import { useMediaList } from '@/hooks/queries/use-media';
 import { useDeleteRecord, useRecord } from '@/hooks/queries/use-records';
+import { useCreateVisit, useDeleteVisit, useVisits } from '@/hooks/queries/use-visits';
 import { confirm } from '@/lib/confirm';
+import type { NotVisitedReason } from '@/types';
 
 /** 7번 — 분석기록 상세/결과 (GET /records/{recordId}) */
 export default function RecordDetailScreen() {
@@ -19,6 +25,52 @@ export default function RecordDetailScreen() {
 
   const { data: record, isPending, error, refetch } = useRecord(validId);
   const deleteRecord = useDeleteRecord();
+
+  const { data: visits } = useVisits(validId);
+  const createVisit = useCreateVisit(validId ?? 0);
+  const deleteVisit = useDeleteVisit(validId ?? 0);
+
+  /**
+   * "병원 다녀오셨나요?" 를 띄울지.
+   *
+   * 스누즈는 이 기기에만 있는 값이라 비동기로 읽어야 하고, 현재 시각도 렌더 중에 읽으면
+   * 안 되는 값입니다(렌더는 순수해야 합니다). 그래서 효과 안에서 한 번 계산해 둡니다.
+   */
+  const [askFollowUp, setAskFollowUp] = useState(false);
+
+  useEffect(() => {
+    if (validId == null || record == null) return;
+    let alive = true;
+
+    readSnoozedUntil(validId).then((until) => {
+      if (alive) setAskFollowUp(shouldAskFollowUp(record, Date.now(), until));
+    });
+
+    return () => {
+      alive = false;
+    };
+  }, [validId, record]);
+
+  async function handleNotVisited(reason: NotVisitedReason) {
+    try {
+      await createVisit.mutateAsync({ visitStatus: 'NOT_VISITED', notVisitedReason: reason });
+    } catch (e) {
+      await confirm({
+        title: '저장하지 못했습니다',
+        message: e instanceof Error ? e.message : undefined,
+      });
+    }
+  }
+
+  async function handleDeleteVisit(visitId: number) {
+    const confirmed = await confirm({
+      title: '이 진료 기록을 삭제할까요?',
+      confirmLabel: '삭제',
+      destructive: true,
+    });
+    if (!confirmed) return;
+    await deleteVisit.mutateAsync(visitId);
+  }
 
   const mediaQueries = useMediaList(record?.mediaIds);
   const photoUrls = mediaQueries
@@ -107,6 +159,22 @@ export default function RecordDetailScreen() {
               pathname: '/hospitals',
               params: { level: record.emergencyLevel ?? '' },
             })
+          }
+          visits={visits ?? []}
+          onPressAddVisit={() => router.push(`/records/${record.recordId}/visit`)}
+          onPressDeleteVisit={handleDeleteVisit}
+          followUpCard={
+            askFollowUp ? (
+              <FollowUpCard
+                isSaving={createVisit.isPending}
+                onPressVisited={() => router.push(`/records/${record.recordId}/visit`)}
+                onSelectNotVisited={handleNotVisited}
+                onPressLater={() => {
+                  setAskFollowUp(false);
+                  if (validId != null) void snooze(validId);
+                }}
+              />
+            ) : undefined
           }
         />
       )}

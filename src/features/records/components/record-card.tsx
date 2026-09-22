@@ -29,7 +29,14 @@ export function RecordCard({ record, onPress }: RecordCardProps) {
       }}
     >
       <View className="flex-1 gap-1 pr-3">
-        <Text className="text-xs text-ink-soft">{formatDateTime(record.createdAt)}</Text>
+        <View className="flex-row items-center gap-1.5">
+          <Text className="text-xs text-ink-soft">{formatDateTime(record.createdAt)}</Text>
+          {record.visitCount > 0 && (
+            <View className="rounded bg-brand-100 px-1.5 py-0.5">
+              <Text className="text-[10px] font-bold text-brand-900">진료 완료</Text>
+            </View>
+          )}
+        </View>
         <Text className="text-base font-bold text-ink" numberOfLines={1}>
           {record.symptomText}
         </Text>
