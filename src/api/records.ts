@@ -9,9 +9,9 @@ import type {
 import { api } from './client';
 
 export const recordsApi = {
-  /** GET /records?userId= — 아직 인증 연동 전이라 userId 를 쿼리로 넘깁니다 */
-  list: async (userId: number) => {
-    const { data } = await api.get<AnalysisRecord[]>('/records', { params: { userId } });
+  /** GET /records — 로그인한 사용자의 기록. 조회 대상을 클라이언트가 정하지 않습니다 */
+  list: async () => {
+    const { data } = await api.get<AnalysisRecord[]>('/records');
     return data;
   },
 

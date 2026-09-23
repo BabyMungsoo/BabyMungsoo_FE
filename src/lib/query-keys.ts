@@ -36,7 +36,7 @@ export const queryKeys = {
   },
   records: {
     all: ['records'] as const,
-    list: (userId: number) => ['records', 'list', userId] as const,
+    list: () => ['records', 'list'] as const,
     detail: (recordId: number) => ['records', 'detail', recordId] as const,
     /** 기록에 달린 병원 방문 팔로우업 */
     visits: (recordId: number) => ['records', 'detail', recordId, 'visits'] as const,

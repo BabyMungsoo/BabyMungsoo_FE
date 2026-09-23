@@ -81,9 +81,8 @@ export interface HospitalVisitCreateRequest {
   nextVisitAt?: string;
 }
 
-/** POST /api/v1/records */
+/** POST /api/v1/records — userId 는 보내지 않습니다. 서버가 토큰에서 채웁니다 */
 export interface AnalysisRecordCreateRequest {
-  userId: number;
   dogId: number;
   symptomText: string;
   aiResult: string;

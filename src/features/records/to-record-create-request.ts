@@ -17,16 +17,15 @@ import type { AnalysisRecordCreateRequest, TriageAnalyzeResult } from '@/types';
  *   level                         → emergencyLevel    두 도메인 모두 IMMEDIATE/WATCH/NORMAL
  *
  * symptomText 는 분석 결과에 없어서 문진 세션의 초기 증상을 그대로 받습니다.
+ * 주인(userId)은 보내지 않습니다 — 서버가 토큰에서 채웁니다.
  */
 export function toRecordCreateRequest({
   result,
-  userId,
   dogId,
   symptomText,
   mediaIds,
 }: {
   result: TriageAnalyzeResult;
-  userId: number;
   dogId: number;
   /** 문진 세션의 initialSymptom */
   symptomText: string;
@@ -34,7 +33,6 @@ export function toRecordCreateRequest({
   mediaIds?: number[];
 }): AnalysisRecordCreateRequest {
   return {
-    userId,
     dogId,
     symptomText,
     // aiResult 는 not-null 이라 소견이 비어 있으면 제목이라도 넣습니다
