@@ -5,7 +5,9 @@ import { PhotoStrip } from '@/components/ui/photo-strip';
 import { TriageBadge } from '@/components/ui/triage-badge';
 import { TRIAGE_LEVEL_META, toTriageLevel } from '@/constants/triage';
 import { formatDateTime } from '@/lib/format';
-import type { AnalysisRecord } from '@/types';
+import type { AnalysisRecord, HospitalVisit } from '@/types';
+
+import { VisitList } from './visit-list';
 
 interface RecordDetailViewProps {
   record: AnalysisRecord;
@@ -14,6 +16,21 @@ interface RecordDetailViewProps {
   onPressEdit: () => void;
   onPressShare: () => void;
   onPressFindHospital: () => void;
+  /** 이 기록에 달린 팔로우업 답변들 */
+  visits?: HospitalVisit[];
+  /**
+   * 방문 조회가 실패했을 때. 빈 목록과 구분해야 합니다 — 오류를 빈 목록으로 그리면
+   * 진료 이력이 있는 사용자가 기록이 없다고 오인합니다.
+   */
+  visitsError?: Error | null;
+  onRetryVisits?: () => void;
+  /**
+   * "병원에 다녀오셨나요?" 질문 카드. 띄울지 말지는 시간·스누즈에 달려 있어
+   * 라우트가 판단해 넘깁니다(이 컴포넌트는 서버도 저장소도 모릅니다).
+   */
+  followUpCard?: React.ReactNode;
+  onPressAddVisit?: () => void;
+  onPressDeleteVisit?: (visitId: number) => void;
 }
 
 /**
@@ -32,6 +49,12 @@ export function RecordDetailView({
   onPressEdit,
   onPressShare,
   onPressFindHospital,
+  visits = [],
+  visitsError,
+  onRetryVisits,
+  followUpCard,
+  onPressAddVisit,
+  onPressDeleteVisit,
 }: RecordDetailViewProps) {
   const level = toTriageLevel(record.emergencyLevel);
 
@@ -70,9 +93,15 @@ export function RecordDetailView({
         {symptoms.length > 0 && (
           <Section title="주요 증상">
             <View className="flex-row flex-wrap gap-2">
+              {/*
+                symptomText 에 쉼표가 없으면 문장 전체가 칩 하나가 됩니다. 최대 폭과 줄바꿈을
+                주지 않으면 그 칩이 화면을 벗어납니다.
+              */}
               {symptoms.map((symptom) => (
-                <View key={symptom} className="rounded-lg bg-brand-100 px-3 py-1.5">
-                  <Text className="text-sm font-semibold text-brand-900">{symptom}</Text>
+                <View key={symptom} className="max-w-full rounded-lg bg-brand-100 px-3 py-1.5">
+                  <Text className="shrink text-sm font-semibold leading-5 text-brand-900">
+                    {symptom}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -98,6 +127,43 @@ export function RecordDetailView({
           </Section>
         )}
       </View>
+
+      {followUpCard && <View className="mt-4">{followUpCard}</View>}
+
+      {(visits.length > 0 || onPressAddVisit) && (
+        <View className="mt-4 gap-3 rounded-2xl bg-paper-card p-5">
+          <Text className="text-base font-bold text-ink">진료 기록</Text>
+
+          {visitsError ? (
+            <View className="gap-2">
+              <Text className="text-sm text-ink-muted">진료 기록을 불러오지 못했어요.</Text>
+              {onRetryVisits && (
+                <Pressable
+                  onPress={onRetryVisits}
+                  accessibilityRole="button"
+                  className="self-start"
+                >
+                  <Text className="text-xs font-semibold text-brand-700 underline">다시 시도</Text>
+                </Pressable>
+              )}
+            </View>
+          ) : visits.length > 0 ? (
+            <VisitList visits={visits} onPressDelete={onPressDeleteVisit} />
+          ) : (
+            <Text className="text-sm text-ink-muted">아직 남긴 진료 기록이 없어요.</Text>
+          )}
+
+          {onPressAddVisit && (
+            <Pressable
+              onPress={onPressAddVisit}
+              accessibilityRole="button"
+              className="items-center rounded-xl border border-ink-line py-3 active:opacity-70"
+            >
+              <Text className="text-sm font-bold text-ink-muted">+ 진료 기록 추가</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
 
       <View className="mt-4 flex-row gap-3">
         <SecondaryButton label="기록 수정" onPress={onPressEdit} />

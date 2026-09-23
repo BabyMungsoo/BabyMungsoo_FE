@@ -2,6 +2,8 @@ import type {
   AnalysisRecord,
   AnalysisRecordCreateRequest,
   AnalysisRecordUpdateRequest,
+  HospitalVisit,
+  HospitalVisitCreateRequest,
 } from '@/types';
 
 import { api } from './client';
@@ -34,5 +36,22 @@ export const recordsApi = {
   /** DELETE /records/{recordId} */
   remove: async (recordId: number) => {
     await api.delete<void>(`/records/${recordId}`);
+  },
+
+  /** GET /records/{recordId}/visits — 최근 방문일 순 */
+  listVisits: async (recordId: number) => {
+    const { data } = await api.get<HospitalVisit[]>(`/records/${recordId}/visits`);
+    return data;
+  },
+
+  /** POST /records/{recordId}/visits — 팔로우업 답변 */
+  createVisit: async (recordId: number, body: HospitalVisitCreateRequest) => {
+    const { data } = await api.post<HospitalVisit>(`/records/${recordId}/visits`, body);
+    return data;
+  },
+
+  /** DELETE /visits/{visitId} */
+  removeVisit: async (visitId: number) => {
+    await api.delete<void>(`/visits/${visitId}`);
   },
 };
