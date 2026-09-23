@@ -4,12 +4,11 @@ import { recordsApi } from '@/api';
 import { queryKeys } from '@/lib/query-keys';
 import type { AnalysisRecordCreateRequest, AnalysisRecordUpdateRequest } from '@/types';
 
-/** GET /records?userId= — 서버가 createdAt 내림차순으로 내려줍니다 */
-export function useRecords(userId: number | undefined) {
+/** GET /records — 토큰의 사용자 기록을 createdAt 내림차순으로 받습니다 */
+export function useRecords() {
   return useQuery({
-    queryKey: queryKeys.records.list(userId!),
-    queryFn: () => recordsApi.list(userId!),
-    enabled: userId != null,
+    queryKey: queryKeys.records.list(),
+    queryFn: () => recordsApi.list(),
   });
 }
 
