@@ -1,3 +1,5 @@
+import PasswordRequirements from '@/components/auth/PasswordRequirements';
+import { isValidPassword, PASSWORD_GUIDANCE } from '@/lib/password';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -53,13 +55,8 @@ export default function SignupScreen() {
       return;
     }
 
-    if (password.length < 8) {
-      setErrorMessage('비밀번호는 8자 이상 입력해주세요.');
-      return;
-    }
-
-    if (password.length > 64) {
-      setErrorMessage('비밀번호는 64자 이하로 입력해주세요.');
+    if (!isValidPassword(password)) {
+      setErrorMessage(PASSWORD_GUIDANCE);
       return;
     }
 
@@ -140,6 +137,7 @@ export default function SignupScreen() {
             autoCapitalize="none"
             autoCorrect={false}
           />
+          <PasswordRequirements password={password} confirmation={passwordConfirm} />
         </View>
 
         {errorMessage ? <Text className="mt-4 text-sm text-red-500">{errorMessage}</Text> : null}

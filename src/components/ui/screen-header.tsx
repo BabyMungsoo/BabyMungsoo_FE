@@ -11,15 +11,26 @@ interface ScreenHeaderProps {
    * 없으면 그냥 back 만 시도합니다.
    */
   backFallback?: Href;
+  backTo?: Href;
   /** 오른쪽 액션 (예: 삭제 아이콘). 없으면 타이틀 중앙 정렬을 위해 빈 자리로 둡니다 */
   right?: React.ReactNode;
 }
 
 /** 가운데 정렬 타이틀 헤더. 뒤로가기가 있어도 타이틀은 화면 정중앙에 오게 양쪽 폭을 맞춥니다. */
-export function ScreenHeader({ title, showBack = false, backFallback, right }: ScreenHeaderProps) {
+export function ScreenHeader({
+  title,
+  showBack = false,
+  backFallback,
+  backTo,
+  right,
+}: ScreenHeaderProps) {
   const router = useRouter();
 
   function handleBack() {
+    if (backTo) {
+      router.replace(backTo);
+      return;
+    }
     if (router.canGoBack()) {
       router.back();
       return;

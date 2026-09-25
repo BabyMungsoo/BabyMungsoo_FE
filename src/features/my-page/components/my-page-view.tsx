@@ -15,6 +15,9 @@ export interface PetSummary {
 
 interface MyPageViewProps {
   pet: PetSummary | null;
+  onPressLogout: () => void;
+  loggingOut: boolean;
+  statusMessage?: string;
   onPressProfile: () => void;
   onPressMyInfo: () => void;
   onPressAddPet: () => void;
@@ -43,6 +46,9 @@ const CARD_SHADOW = {
 
 export function MyPageView({
   pet,
+  onPressLogout,
+  loggingOut,
+  statusMessage,
   onPressProfile,
   onPressMyInfo,
   onPressAddPet,
@@ -56,9 +62,14 @@ export function MyPageView({
     <>
       <ScreenHeader title="마이페이지" />
 
-      <View className="flex-1 gap-4 px-5 pt-2">
+      <View className="flex-1 gap-3 px-5 pb-3">
+        {statusMessage ? (
+          <Text accessibilityRole="alert" className="text-sm text-red-600">
+            {statusMessage}
+          </Text>
+        ) : null}
         {/* 반려동물 카드 */}
-        <View className="rounded-2xl bg-paper-card p-5" style={CARD_SHADOW}>
+        <View className="rounded-2xl bg-paper-card p-3" style={CARD_SHADOW}>
           {pet ? (
             <>
               <View className="flex-row items-center gap-4">
@@ -67,15 +78,15 @@ export function MyPageView({
                     <AuthImage path={pet.profileImage} className="h-full w-full" />
                   ) : (
                     <View className="h-full w-full items-center justify-center">
-                      <Text className="text-2xl font-bold text-brand-700">
-                        {pet.name.slice(0, 1)}
+                      <Text className="text-2xl font-bold leading-9 text-brand-700">
+                        {Array.from(pet.name)[0] ?? ''}
                       </Text>
                     </View>
                   )}
                 </View>
 
                 <View className="flex-1 gap-1">
-                  <Text className="text-lg font-bold text-ink">{pet.name}</Text>
+                  <Text className="text-lg font-bold leading-7 text-ink">{pet.name}</Text>
 
                   <Text className="text-sm text-ink-muted">
                     {pet.ageLabel} {GENDER_SYMBOL[pet.gender]}
@@ -90,7 +101,7 @@ export function MyPageView({
               <Pressable
                 onPress={onPressProfile}
                 accessibilityRole="button"
-                className="mt-4 self-end rounded-full border border-ink-line px-4 py-2 active:opacity-70"
+                className="mt-2 self-end rounded-full border border-ink-line px-4 py-2 active:opacity-70"
               >
                 <Text className="text-xs font-semibold text-ink-muted">프로필 보기</Text>
               </Pressable>
@@ -115,20 +126,31 @@ export function MyPageView({
 
         {/* 사용자 메뉴 */}
         <View className="rounded-2xl bg-paper-card" style={CARD_SHADOW}>
-          <MenuRow icon="person-outline" label="내 정보 확인" onPress={onPressMyInfo} />
+          <MenuRow compact icon="person-outline" label="내 정보 확인" onPress={onPressMyInfo} />
 
           <MenuDivider />
 
-          <MenuRow icon="document-text-outline" label="분석 기록" onPress={onPressRecords} />
+          <MenuRow
+            compact
+            icon="document-text-outline"
+            label="분석 기록"
+            onPress={onPressRecords}
+          />
 
           <MenuDivider />
 
-          <MenuRow icon="heart-outline" label="즐겨찾는 병원" onPress={onPressFavoriteHospitals} />
+          <MenuRow
+            compact
+            icon="heart-outline"
+            label="즐겨찾는 병원"
+            onPress={onPressFavoriteHospitals}
+          />
         </View>
 
         {/* 설정 메뉴 */}
         <View className="rounded-2xl bg-paper-card" style={CARD_SHADOW}>
           <MenuRow
+            compact
             icon="notifications-outline"
             label="알림 설정"
             onPress={onPressNotificationSettings}
@@ -136,12 +158,32 @@ export function MyPageView({
 
           <MenuDivider />
 
-          <MenuRow icon="help-circle-outline" label="고객센터" onPress={onPressCustomerCenter} />
+          <MenuRow
+            compact
+            icon="help-circle-outline"
+            label="고객센터"
+            onPress={onPressCustomerCenter}
+          />
 
           <MenuDivider />
 
-          <MenuRow icon="information-circle-outline" label="앱 정보" onPress={onPressAppInfo} />
+          <MenuRow
+            compact
+            icon="information-circle-outline"
+            label="앱 정보"
+            onPress={onPressAppInfo}
+          />
         </View>
+        <Pressable
+          accessibilityRole="button"
+          disabled={loggingOut}
+          onPress={onPressLogout}
+          className="min-h-12 items-center justify-center rounded-xl border border-ink-line"
+        >
+          <Text className="text-sm text-ink-muted">
+            {loggingOut ? '로그아웃 중...' : '로그아웃'}
+          </Text>
+        </Pressable>
       </View>
     </>
   );

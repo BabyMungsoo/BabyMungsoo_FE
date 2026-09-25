@@ -40,7 +40,7 @@ export function NotificationSettingsView({
 
   return (
     <>
-      <ScreenHeader title="알림 설정" showBack backFallback="/my-page" />
+      <ScreenHeader title="알림 설정" showBack backTo="/my-page" />
 
       <ScrollView contentContainerClassName="gap-6 px-5 pb-8" showsVerticalScrollIndicator={false}>
         <Section title="알림 수신">

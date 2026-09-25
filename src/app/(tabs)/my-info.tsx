@@ -1,3 +1,6 @@
+import { petAgeLabel } from '@/lib/pet-age';
+import PasswordRequirements from '@/components/auth/PasswordRequirements';
+import { isValidPassword, PASSWORD_GUIDANCE } from '@/lib/password';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -13,12 +16,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { setAuthToken, usersApi } from '@/api';
+import { usersApi } from '@/api';
 import AuthImage from '@/components/common/AuthImage';
 import AppInput from '@/components/common/AppInput';
 import PrimaryButton from '@/components/common/PrimaryButton';
 import { useDeletePet, usePets } from '@/hooks/queries/use-pets';
-import { useSessionStore } from '@/stores/use-session-store';
+import { clearLocalSession } from '@/lib/logout';
 
 const CARD_SHADOW = {
   shadowColor: '#000',
@@ -39,8 +42,6 @@ export default function MyInfoScreen() {
   const [newPassword, setNewPassword] = useState('');
 
   const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
-
-  const clearSession = useSessionStore((state) => state.clearSession);
 
   const {
     data: user,
@@ -86,9 +87,8 @@ export default function MyInfoScreen() {
   const withdrawMutation = useMutation({
     mutationFn: usersApi.withdraw,
 
-    onSuccess: () => {
-      setAuthToken(null);
-      clearSession();
+    onSuccess: async () => {
+      await clearLocalSession();
 
       router.replace('/login');
     },
@@ -174,18 +174,14 @@ export default function MyInfoScreen() {
   };
 
   const handleChangePassword = () => {
+    if (changePasswordMutation.isPending) return;
     if (!currentPassword) {
       showMessage('현재 비밀번호를 입력해주세요.');
       return;
     }
 
-    if (newPassword.length < 8) {
-      showMessage('새 비밀번호는 8자 이상이어야 합니다.');
-      return;
-    }
-
-    if (newPassword.length > 64) {
-      showMessage('새 비밀번호는 64자 이하여야 합니다.');
+    if (!isValidPassword(newPassword)) {
+      showMessage(PASSWORD_GUIDANCE);
       return;
     }
 
@@ -280,7 +276,9 @@ export default function MyInfoScreen() {
                       <AuthImage path={pet.profileImage} className="h-full w-full" />
                     ) : (
                       <View className="h-full w-full items-center justify-center">
-                        <Text className="font-bold text-brand-700">{pet.name.slice(0, 1)}</Text>
+                        <Text className="font-bold text-brand-700">
+                          {Array.from(pet.name)[0] ?? ''}
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -289,7 +287,7 @@ export default function MyInfoScreen() {
                     <Text className="font-semibold text-ink">{pet.name}</Text>
 
                     <Text className="mt-1 text-xs text-ink-muted">
-                      {pet.breed} · {pet.age}세
+                      {pet.breed} · {petAgeLabel(pet.age, pet.birthDate)}
                     </Text>
                   </View>
 
@@ -353,13 +351,16 @@ export default function MyInfoScreen() {
         onRequestClose={() => setPasswordModalVisible(false)}
       >
         <View className="flex-1 items-center justify-center bg-black/30 px-5">
-          <View
-            className="w-full rounded-2xl bg-white p-5"
+          <ScrollView
+            className="w-full rounded-2xl bg-white"
+            contentContainerClassName="p-5"
+            keyboardShouldPersistTaps="handled"
             style={{
               maxWidth: 380,
+              maxHeight: '90%',
             }}
           >
-            <Text className="text-lg font-bold text-ink">비밀번호 변경</Text>
+            <Text className="text-lg font-bold leading-7 text-ink">비밀번호 변경</Text>
 
             <Text className="mt-1 text-sm text-ink-muted">
               현재 비밀번호를 확인한 뒤 새 비밀번호를 설정해줘.
@@ -389,6 +390,7 @@ export default function MyInfoScreen() {
                 onChangeText={setNewPasswordConfirm}
                 autoCapitalize="none"
               />
+              <PasswordRequirements password={newPassword} confirmation={newPasswordConfirm} />
             </View>
 
             <View className="mt-6 gap-2">
@@ -401,10 +403,10 @@ export default function MyInfoScreen() {
                 onPress={() => setPasswordModalVisible(false)}
                 className="h-11 items-center justify-center rounded-xl active:bg-gray-100"
               >
-                <Text className="text-sm font-semibold text-ink-muted">취소</Text>
+                <Text className="text-sm font-semibold leading-6 text-ink-muted">취소</Text>
               </Pressable>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </SafeAreaView>

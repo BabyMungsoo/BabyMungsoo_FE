@@ -8,15 +8,20 @@ interface MenuRowProps {
   icon: IconName;
   label: string;
   onPress: () => void;
+  compact?: boolean;
 }
 
 /** 마이페이지 계열 화면에서 반복되는 '아이콘 + 라벨 + 화살표' 한 줄 */
-export function MenuRow({ icon, label, onPress }: MenuRowProps) {
+export function MenuRow({ icon, label, onPress, compact }: MenuRowProps) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      className="flex-row items-center gap-3 px-4 py-4 active:opacity-70"
+      className={
+        compact
+          ? 'min-h-11 flex-row items-center gap-3 px-4 py-2 active:opacity-70'
+          : 'flex-row items-center gap-3 px-4 py-4 active:opacity-70'
+      }
     >
       <Ionicons name={icon} size={20} color="#8c867a" />
       <Text className="flex-1 text-sm font-semibold text-ink">{label}</Text>

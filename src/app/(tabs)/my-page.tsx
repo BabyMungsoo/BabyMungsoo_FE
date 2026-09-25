@@ -1,5 +1,8 @@
+import { petAgeLabel } from '@/lib/pet-age';
+import { useRef, useState } from 'react';
+import { clearLocalSession } from '@/lib/logout';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Alert, Text } from 'react-native';
+import { Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MyPageView, type PetSummary } from '@/features/my-page/components/my-page-view';
@@ -14,28 +17,31 @@ export default function MyPageScreen() {
 
   const { data: pets, isPending, error } = usePets();
 
-  if (isPending) {
-    return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-paper" edges={['top']}>
-        <ActivityIndicator />
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-paper px-6" edges={['top']}>
-        <Text className="text-center text-red-500">마이페이지 정보를 불러오지 못했습니다.</Text>
-      </SafeAreaView>
-    );
-  }
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+  const logoutBusy = useRef(false);
+  const handleLogout = async () => {
+    if (logoutBusy.current) return;
+    logoutBusy.current = true;
+    setLoggingOut(true);
+    setLogoutError('');
+    try {
+      await clearLocalSession();
+      router.replace('/login');
+    } catch {
+      setLogoutError('로그인 정보를 삭제하지 못했어요. 다시 시도해주세요.');
+    } finally {
+      logoutBusy.current = false;
+      setLoggingOut(false);
+    }
+  };
 
   const pet = pets?.[0];
 
   const petSummary: PetSummary | null = pet
     ? {
         name: pet.name,
-        ageLabel: `${pet.age}세`,
+        ageLabel: petAgeLabel(pet.age, pet.birthDate),
         gender: pet.gender,
         weightKg: pet.weight ?? 0,
         breed: pet.breed,
@@ -47,7 +53,19 @@ export default function MyPageScreen() {
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
       <MyPageView
         pet={petSummary}
-        onPressProfile={() => router.push('/pet-profile' as never)}
+        onPressLogout={handleLogout}
+        loggingOut={loggingOut}
+        statusMessage={
+          logoutError ||
+          (error
+            ? '반려동물 정보를 불러오지 못했습니다.'
+            : isPending
+              ? '반려동물 정보를 불러오는 중입니다.'
+              : '')
+        }
+        onPressProfile={() =>
+          router.push({ pathname: '/pet-profile', params: { petId: String(pet?.petId ?? '') } })
+        }
         onPressMyInfo={() => router.push('/my-info' as never)}
         onPressAddPet={() =>
           router.push({
