@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MyPageView, type PetSummary } from '@/features/my-page/components/my-page-view';
 import { usePets } from '@/hooks/queries/use-pets';
+import { useSessionStore } from '@/stores/use-session-store';
 
 function showComingSoon() {
   Alert.alert('준비 중이에요', '아직 구현 중인 기능이에요.');
@@ -14,6 +15,7 @@ function showComingSoon() {
 
 export default function MyPageScreen() {
   const router = useRouter();
+  const role = useSessionStore((state) => state.role);
 
   const { data: pets, isPending, error } = usePets();
 
@@ -79,7 +81,8 @@ export default function MyPageScreen() {
         onPressFavoriteHospitals={showComingSoon}
         onPressNotificationSettings={() => router.push('/notification-settings')}
         onPressCustomerCenter={() => router.push('/customer-center')}
-        onPressAppInfo={showComingSoon}
+        onPressAppInfo={() => router.push('/app-info')}
+        onPressAdmin={role === 'ADMIN' ? () => router.push('/admin') : undefined}
       />
     </SafeAreaView>
   );

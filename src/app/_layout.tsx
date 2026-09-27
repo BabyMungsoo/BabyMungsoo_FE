@@ -13,20 +13,29 @@ import { useEffect } from 'react';
 
 import { setAuthToken } from '@/api';
 import { useSessionStore } from '@/stores/use-session-store';
+import { normalizeRole } from '@/types/auth';
 
 export default function RootLayout() {
   const setSession = useSessionStore((state) => state.setSession);
 
   useEffect(() => {
     const restoreSession = async () => {
-      const [accessToken, userId, email, name] = await Promise.all([
+      const [accessToken, userId, email, name, role] = await Promise.all([
         AsyncStorage.getItem('accessToken'),
         AsyncStorage.getItem('userId'),
         AsyncStorage.getItem('email'),
         AsyncStorage.getItem('name'),
+        AsyncStorage.getItem('role'),
       ]);
 
-      if (!accessToken || !userId || !email || !name) {
+      if (
+        !accessToken ||
+        !userId ||
+        !email ||
+        !name ||
+        !Number.isSafeInteger(Number(userId)) ||
+        useSessionStore.getState().isHydrated
+      ) {
         return;
       }
 
@@ -37,10 +46,13 @@ export default function RootLayout() {
         userId: Number(userId),
         email,
         name,
+        role: normalizeRole(role),
       });
     };
 
-    restoreSession();
+    restoreSession()
+      .catch(() => undefined)
+      .finally(() => useSessionStore.getState().finishHydration());
   }, [setSession]);
 
   return (

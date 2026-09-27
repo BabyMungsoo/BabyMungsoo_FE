@@ -103,6 +103,9 @@ export default function TabLayout() {
       <Tabs.Screen name="customer-center" options={{ href: null }} />
       <Tabs.Screen name="pet-profile" options={{ href: null }} />
       <Tabs.Screen name="my-info" options={{ href: null }} />
+      <Tabs.Screen name="app-info" options={{ href: null }} />
+      <Tabs.Screen name="admin" options={{ href: null }} />
+      <Tabs.Screen name="inquiries" options={{ href: null }} />
     </Tabs>
   );
 }

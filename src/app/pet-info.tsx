@@ -291,6 +291,7 @@ function PetInfoForm({ initialPet }: { initialPet?: Pet }) {
         accessToken: loginResult.accessToken,
         email: loginResult.email,
         name: loginResult.name,
+        role: loginResult.role,
       });
 
       /**

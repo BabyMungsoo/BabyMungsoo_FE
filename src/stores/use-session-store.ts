@@ -1,16 +1,21 @@
 import { create } from 'zustand';
+import { normalizeRole, type UserRole } from '@/types/auth';
 
 interface SessionState {
   userId: number | null;
   accessToken: string | null;
   email: string | null;
   name: string | null;
+  role: UserRole | null;
+  isHydrated: boolean;
+  finishHydration: () => void;
 
   setSession: (session: {
     userId: number;
     accessToken: string;
     email: string;
     name: string;
+    role?: UserRole;
   }) => void;
 
   clearSession: () => void;
@@ -21,6 +26,9 @@ export const useSessionStore = create<SessionState>((set) => ({
   accessToken: null,
   email: null,
   name: null,
+  role: null,
+  isHydrated: false,
+  finishHydration: () => set({ isHydrated: true }),
 
   setSession: (session) =>
     set({
@@ -28,6 +36,8 @@ export const useSessionStore = create<SessionState>((set) => ({
       accessToken: session.accessToken,
       email: session.email,
       name: session.name,
+      role: normalizeRole(session.role),
+      isHydrated: true,
     }),
 
   clearSession: () =>
@@ -36,6 +46,7 @@ export const useSessionStore = create<SessionState>((set) => ({
       accessToken: null,
       email: null,
       name: null,
+      role: null,
     }),
 }));
 

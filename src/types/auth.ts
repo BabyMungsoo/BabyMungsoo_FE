@@ -1,3 +1,9 @@
+export type UserRole = 'USER' | 'ADMIN';
+
+export function normalizeRole(role: unknown): UserRole {
+  return role === 'ADMIN' ? 'ADMIN' : 'USER';
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -9,6 +15,7 @@ export interface LoginResponse {
   name: string;
   accessToken: string;
   tokenType: string;
+  role?: UserRole;
 }
 
 export interface SignupRequest {

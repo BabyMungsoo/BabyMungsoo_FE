@@ -5,7 +5,7 @@ import { useSessionStore } from '@/stores/use-session-store';
 import { usePetStore } from '@/stores/use-pet-store';
 import { useSignupStore } from '@/stores/use-signup-store';
 export async function clearLocalSession() {
-  await AsyncStorage.multiRemove(['accessToken', 'userId', 'email', 'name']);
+  await AsyncStorage.multiRemove(['accessToken', 'userId', 'email', 'name', 'role']);
   setAuthToken(null);
   useSessionStore.getState().clearSession();
   usePetStore.getState().selectPet(null);

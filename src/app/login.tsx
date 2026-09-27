@@ -1,12 +1,11 @@
 // 로그인
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { petsApi, setAuthToken } from '@/api';
+import { setAuthToken } from '@/api';
 import AppInput from '@/components/common/AppInput';
 import PrimaryButton from '@/components/common/PrimaryButton';
 import { useLogin } from '@/hooks/queries/use-auth';
@@ -44,6 +43,7 @@ export default function LoginScreen() {
         accessToken: result.accessToken,
         email: result.email,
         name: result.name,
+        role: result.role,
       });
 
       if (rememberLogin) {
@@ -51,8 +51,9 @@ export default function LoginScreen() {
         await AsyncStorage.setItem('userId', String(result.userId));
         await AsyncStorage.setItem('email', result.email);
         await AsyncStorage.setItem('name', result.name);
+        await AsyncStorage.setItem('role', result.role);
       } else {
-        await AsyncStorage.multiRemove(['accessToken', 'userId', 'email', 'name']);
+        await AsyncStorage.multiRemove(['accessToken', 'userId', 'email', 'name', 'role']);
       }
 
       // 펫 존재 여부와 상관없이 로그인 성공 후 홈으로 이동
@@ -124,6 +125,13 @@ export default function LoginScreen() {
             </View>
           </View>
 
+          {/* 로그인 에러 메시지 */}
+          {loginError ? (
+            <View className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+              <Text className="text-sm font-medium text-red-500">{loginError}</Text>
+            </View>
+          ) : null}
+
           {/* 로그인 상태 유지 */}
           <Pressable
             onPress={() => setRememberLogin((prev) => !prev)}
@@ -144,6 +152,7 @@ export default function LoginScreen() {
             <PrimaryButton
               title={loginMutation.isPending ? '로그인 중...' : '로그인'}
               onPress={handleLogin}
+              disabled={loginMutation.isPending}
             />
           </View>
 

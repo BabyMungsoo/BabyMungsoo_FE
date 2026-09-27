@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import AuthImage from '@/components/common/AuthImage';
 import { ScreenHeader } from '@/components/ui/screen-header';
@@ -26,6 +26,7 @@ interface MyPageViewProps {
   onPressNotificationSettings: () => void;
   onPressCustomerCenter: () => void;
   onPressAppInfo: () => void;
+  onPressAdmin?: () => void;
 }
 
 const GENDER_SYMBOL: Record<PetSummary['gender'], string> = {
@@ -57,12 +58,13 @@ export function MyPageView({
   onPressNotificationSettings,
   onPressCustomerCenter,
   onPressAppInfo,
+  onPressAdmin,
 }: MyPageViewProps) {
   return (
     <>
       <ScreenHeader title="마이페이지" />
 
-      <View className="flex-1 gap-3 px-5 pb-3">
+      <ScrollView className="flex-1" contentContainerClassName="gap-3 px-5 pb-5">
         {statusMessage ? (
           <Text accessibilityRole="alert" className="text-sm text-red-600">
             {statusMessage}
@@ -173,6 +175,17 @@ export function MyPageView({
             label="앱 정보"
             onPress={onPressAppInfo}
           />
+          {onPressAdmin && (
+            <>
+              <MenuDivider />
+              <MenuRow
+                compact
+                icon="shield-checkmark-outline"
+                label="관리자 페이지"
+                onPress={onPressAdmin}
+              />
+            </>
+          )}
         </View>
         <Pressable
           accessibilityRole="button"
@@ -184,7 +197,7 @@ export function MyPageView({
             {loggingOut ? '로그아웃 중...' : '로그아웃'}
           </Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </>
   );
 }

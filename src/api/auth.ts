@@ -1,11 +1,12 @@
 import type { LoginRequest, LoginResponse, SignupRequest, SignupResponse } from '@/types';
 
 import { api } from './client';
+import { normalizeRole } from '@/types/auth';
 
 export const authApi = {
   login: async (body: LoginRequest) => {
     const { data } = await api.post<LoginResponse>('/auth/login', body);
-    return data;
+    return { ...data, role: normalizeRole(data.role) };
   },
 
   signup: async (body: SignupRequest) => {
