@@ -8,6 +8,7 @@ import { KakaoMap } from '@/features/hospitals/components/kakao-map';
 import type { KakaoMapHandle } from '@/features/hospitals/components/kakao-map.types';
 import type { MapMarker } from '@/features/hospitals/kakao-map-script';
 import type { Hospital, LatLng } from '@/types';
+import { useThemeColors } from '@/stores/use-theme-store';
 
 interface HospitalMapViewProps {
   center: LatLng;
@@ -68,6 +69,7 @@ export function HospitalMapView({
   onMapError,
 }: HospitalMapViewProps) {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const mapRef = useRef<KakaoMapHandle>(null);
 
   return (
@@ -99,7 +101,7 @@ export function HospitalMapView({
             className="h-10 w-10 items-center justify-center rounded-full bg-paper-card active:opacity-70"
             style={FLOATING_SHADOW}
           >
-            <Ionicons name="arrow-back" size={20} color="#2e2a24" />
+            <Ionicons name="arrow-back" size={20} color={colors.ink} />
           </Pressable>
 
           <View
@@ -193,6 +195,7 @@ const FLOATING_SHADOW = {
 
 /** 세로로 붙은 + / − 두 버튼. 하나의 알약으로 보이게 가운데 선으로만 나눕니다. */
 function ZoomButtons({ onZoomIn, onZoomOut }: { onZoomIn: () => void; onZoomOut: () => void }) {
+  const colors = useThemeColors();
   return (
     <View className="overflow-hidden rounded-full bg-paper-card" style={FLOATING_SHADOW}>
       <Pressable
@@ -201,7 +204,7 @@ function ZoomButtons({ onZoomIn, onZoomOut }: { onZoomIn: () => void; onZoomOut:
         accessibilityLabel="지도 확대"
         className="h-11 w-11 items-center justify-center active:bg-paper-chip"
       >
-        <Ionicons name="add" size={22} color="#2e2a24" />
+        <Ionicons name="add" size={22} color={colors.ink} />
       </Pressable>
       <View className="mx-3 h-px bg-ink-line" />
       <Pressable
@@ -210,7 +213,7 @@ function ZoomButtons({ onZoomIn, onZoomOut }: { onZoomIn: () => void; onZoomOut:
         accessibilityLabel="지도 축소"
         className="h-11 w-11 items-center justify-center active:bg-paper-chip"
       >
-        <Ionicons name="remove" size={22} color="#2e2a24" />
+        <Ionicons name="remove" size={22} color={colors.ink} />
       </Pressable>
     </View>
   );

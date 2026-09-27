@@ -2,8 +2,7 @@ import { Tabs } from 'expo-router';
 import { Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const ACTIVE = '#2e2a24';
-const INACTIVE = '#b5afa3';
+import { useThemeColors } from '@/stores/use-theme-store';
 
 /** 아이콘 + 라벨이 눌리지 않고 들어가는 최소 높이. 여기에 하단 인셋을 더해 씁니다. */
 const TAB_BAR_CONTENT_HEIGHT = 62;
@@ -19,6 +18,7 @@ export default function TabLayout() {
   const insets = useSafeAreaInsets();
   // 웹은 하단 인셋이 0이라 라벨이 화면 끝에 붙어 잘린다. 최소 12px를 보장한다.
   const bottomInset = Math.max(insets.bottom, 12);
+  const colors = useThemeColors();
 
   return (
     <Tabs
@@ -31,11 +31,13 @@ export default function TabLayout() {
       backBehavior="history"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: ACTIVE,
-        tabBarInactiveTintColor: INACTIVE,
+        tabBarActiveTintColor: colors.ink,
+        tabBarInactiveTintColor: colors.inkSoft,
+        // 탭 화면 사이 전환 때 비치는 배경도 테마를 따라가게 합니다
+        sceneStyle: { backgroundColor: colors.paper },
         tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopColor: '#e8e4db',
+          backgroundColor: colors.paperCard,
+          borderTopColor: colors.inkLine,
           height: TAB_BAR_CONTENT_HEIGHT + bottomInset,
           paddingTop: 6,
           paddingBottom: bottomInset,
@@ -103,6 +105,9 @@ export default function TabLayout() {
       <Tabs.Screen name="customer-center" options={{ href: null }} />
       <Tabs.Screen name="pet-profile" options={{ href: null }} />
       <Tabs.Screen name="my-info" options={{ href: null }} />
+      <Tabs.Screen name="app-info" options={{ href: null }} />
+      <Tabs.Screen name="admin" options={{ href: null }} />
+      <Tabs.Screen name="inquiries" options={{ href: null }} />
     </Tabs>
   );
 }

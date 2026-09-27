@@ -1,12 +1,20 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, Text } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import type { Pet } from '@/types';
 
 const GENDER_LABEL: Record<Pet['gender'], string> = {
   MALE: '남',
   FEMALE: '여',
+};
+
+const CARD_SHADOW = {
+  shadowColor: '#000',
+  shadowOpacity: 0.04,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 2 },
+  elevation: 1,
 };
 
 function petSummary(pet: Pet) {
@@ -19,6 +27,7 @@ interface PetSelectorProps {
   onSelect: (petId: number) => void;
 }
 
+/** 홈 반려동물 선택 드롭다운. 누르면 박스 바로 아래로 목록이 펼쳐집니다. */
 export function PetSelector({ pets, selectedPetId, onSelect }: PetSelectorProps) {
   const [open, setOpen] = useState(false);
   const selectedPet = useMemo(
@@ -27,46 +36,49 @@ export function PetSelector({ pets, selectedPetId, onSelect }: PetSelectorProps)
   );
 
   return (
-    <>
+    <View className="overflow-hidden rounded-2xl bg-paper-card" style={CARD_SHADOW}>
       <Pressable
-        onPress={() => setOpen(true)}
-        className="flex-row items-center justify-between rounded-2xl bg-paper-card px-5 py-4"
-        style={{
-          shadowColor: '#000',
-          shadowOpacity: 0.04,
-          shadowRadius: 8,
-          shadowOffset: { width: 0, height: 2 },
-          elevation: 1,
-        }}
+        onPress={() => setOpen((value) => !value)}
+        accessibilityRole="button"
+        accessibilityLabel="반려동물 선택"
+        accessibilityState={{ expanded: open }}
+        className="flex-row items-center justify-between gap-3 px-5 py-4 active:opacity-70"
       >
-        <Text className="text-base font-semibold text-ink" numberOfLines={1}>
+        <Text className="flex-1 text-base font-semibold text-ink" numberOfLines={1}>
           {selectedPet ? petSummary(selectedPet) : '반려동물을 선택해주세요'}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#8c867a" />
+        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color="#8c867a" />
       </Pressable>
 
-      <Modal visible={open} animationType="fade" transparent onRequestClose={() => setOpen(false)}>
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setOpen(false)}>
-          <Pressable className="gap-1 rounded-t-3xl bg-paper-card p-4 pb-8" onPress={() => {}}>
-            <Text className="px-2 pb-2 text-sm font-semibold text-ink-muted">반려동물 선택</Text>
-            {pets.map((pet) => (
+      {open && (
+        <View className="border-t border-ink-line py-1">
+          {pets.map((pet) => {
+            const selected = pet.petId === selectedPet?.petId;
+            return (
               <Pressable
                 key={pet.petId}
                 onPress={() => {
                   onSelect(pet.petId);
                   setOpen(false);
                 }}
-                className="flex-row items-center justify-between rounded-xl px-3 py-3 active:bg-paper-chip"
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                className={`flex-row items-center justify-between gap-3 px-5 py-3 active:bg-paper-chip ${
+                  selected ? 'bg-paper' : ''
+                }`}
               >
-                <Text className="text-base text-ink">{petSummary(pet)}</Text>
-                {pet.petId === selectedPet?.petId && (
-                  <Ionicons name="checkmark" size={18} color="#d9a50f" />
-                )}
+                <Text
+                  className={`flex-1 text-base ${selected ? 'font-semibold text-ink' : 'text-ink-muted'}`}
+                  numberOfLines={1}
+                >
+                  {petSummary(pet)}
+                </Text>
+                {selected && <Ionicons name="checkmark" size={18} color="#d9a50f" />}
               </Pressable>
-            ))}
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </>
+            );
+          })}
+        </View>
+      )}
+    </View>
   );
 }

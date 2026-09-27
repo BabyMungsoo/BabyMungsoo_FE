@@ -1,3 +1,5 @@
+import PasswordRequirements from '@/components/auth/PasswordRequirements';
+import { isValidPassword, PASSWORD_GUIDANCE } from '@/lib/password';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -7,6 +9,16 @@ import AppInput from '@/components/common/AppInput';
 import PrimaryButton from '@/components/common/PrimaryButton';
 import ScreenHeader from '@/components/common/ScreenHeader';
 import { useSignupStore } from '@/stores/use-signup-store';
+import { authApi } from '@/api/auth';
+
+// 백엔드 @Email 검증 전에 프론트에서도 간단하게 확인
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateEmail(email: string): string | null {
+  if (!email) return '이메일을 입력해주세요.';
+  if (!EMAIL_REGEX.test(email)) return '올바른 이메일 형식을 입력해주세요.';
+  return null;
+}
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
@@ -15,8 +27,46 @@ export default function SignupScreen() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  // 중복 확인을 통과한 이메일. 입력값이 바뀌면 다시 확인해야 합니다.
+  const [checkedEmail, setCheckedEmail] = useState<string | null>(null);
+  const [emailMessage, setEmailMessage] = useState<{ text: string; ok: boolean } | null>(null);
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   const setSignupDraft = useSignupStore((state) => state.setSignupDraft);
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    setCheckedEmail(null);
+    setEmailMessage(null);
+  };
+
+  const handleCheckEmail = async () => {
+    const trimmedEmail = email.trim();
+    const emailError = validateEmail(trimmedEmail);
+    if (emailError) {
+      setEmailMessage({ text: emailError, ok: false });
+      return;
+    }
+
+    setCheckingEmail(true);
+    setEmailMessage(null);
+    try {
+      const available = await authApi.checkEmail(trimmedEmail);
+      setCheckedEmail(available ? trimmedEmail : null);
+      setEmailMessage(
+        available
+          ? { text: '사용 가능한 이메일입니다.', ok: true }
+          : { text: '이미 사용중인 이메일입니다.', ok: false },
+      );
+    } catch (error) {
+      setEmailMessage({
+        text: error instanceof Error ? error.message : '이메일을 확인하지 못했습니다.',
+        ok: false,
+      });
+    } finally {
+      setCheckingEmail(false);
+    }
+  };
 
   const handleNext = () => {
     setErrorMessage('');
@@ -25,16 +75,14 @@ export default function SignupScreen() {
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
 
-    if (!trimmedEmail) {
-      setErrorMessage('이메일을 입력해주세요.');
+    const emailError = validateEmail(trimmedEmail);
+    if (emailError) {
+      setErrorMessage(emailError);
       return;
     }
 
-    // 백엔드 @Email 검증 전에 프론트에서도 간단하게 확인
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(trimmedEmail)) {
-      setErrorMessage('올바른 이메일 형식을 입력해주세요.');
+    if (checkedEmail !== trimmedEmail) {
+      setErrorMessage('이메일 중복 확인을 해주세요.');
       return;
     }
 
@@ -53,13 +101,8 @@ export default function SignupScreen() {
       return;
     }
 
-    if (password.length < 8) {
-      setErrorMessage('비밀번호는 8자 이상 입력해주세요.');
-      return;
-    }
-
-    if (password.length > 64) {
-      setErrorMessage('비밀번호는 64자 이하로 입력해주세요.');
+    if (!isValidPassword(password)) {
+      setErrorMessage(PASSWORD_GUIDANCE);
       return;
     }
 
@@ -96,15 +139,42 @@ export default function SignupScreen() {
         </View>
 
         <View className="mt-8 gap-5">
-          <AppInput
-            label="이메일"
-            placeholder="example@email.com"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-          />
+          <View className="gap-2">
+            <Text className="text-[14px] font-semibold text-[#444444]">이메일</Text>
+            <View className="flex-row items-center gap-2">
+              <View className="flex-1">
+                <AppInput
+                  accessibilityLabel="이메일"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChangeText={handleEmailChange}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => void handleCheckEmail()}
+                disabled={checkingEmail || !email.trim()}
+                className={`h-14 items-center justify-center rounded-xl px-4 ${
+                  checkingEmail || !email.trim() ? 'bg-gray-200' : 'bg-[#FFD83D] active:opacity-70'
+                }`}
+              >
+                <Text className="text-sm font-semibold text-gray-900">
+                  {checkingEmail ? '확인 중...' : '중복 확인'}
+                </Text>
+              </Pressable>
+            </View>
+            {emailMessage ? (
+              <Text
+                accessibilityRole={emailMessage.ok ? undefined : 'alert'}
+                className={`text-sm ${emailMessage.ok ? 'text-green-600' : 'text-red-500'}`}
+              >
+                {emailMessage.text}
+              </Text>
+            ) : null}
+          </View>
 
           <AppInput
             label="이름"
@@ -140,6 +210,7 @@ export default function SignupScreen() {
             autoCapitalize="none"
             autoCorrect={false}
           />
+          <PasswordRequirements password={password} confirmation={passwordConfirm} />
         </View>
 
         {errorMessage ? <Text className="mt-4 text-sm text-red-500">{errorMessage}</Text> : null}

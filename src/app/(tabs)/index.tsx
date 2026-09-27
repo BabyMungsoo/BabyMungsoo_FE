@@ -92,7 +92,7 @@ export default function HomeScreen() {
       <ScrollView contentContainerClassName="pb-8" showsVerticalScrollIndicator={false}>
         <View className="rounded-b-[32px] bg-brand-400 px-5 pb-10 pt-4">
           <View className="flex-row items-start justify-between">
-            <Text className="text-2xl font-extrabold leading-tight text-ink">
+            <Text className="text-2xl font-extrabold leading-tight text-[#2e2a24]">
               우리 아이{'\n'}어디가 아프세요?
             </Text>
             <View className="h-12 w-12 items-center justify-center rounded-full bg-paper-card">
@@ -140,7 +140,7 @@ export default function HomeScreen() {
             accessibilityRole="button"
             className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
           >
-            <Text className="text-center text-base font-bold text-ink">
+            <Text className="text-center text-base font-bold text-[#2e2a24]">
               {generateQuestions.isPending
                 ? '맞춤 질문을 준비하고 있어요...'
                 : isStarting
