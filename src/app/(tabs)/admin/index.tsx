@@ -7,7 +7,7 @@ import { MenuRow } from '@/features/my-page/components/menu-row';
 export default function AdminScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScreenHeader title="관리자 페이지" showBack backFallback="/my-page" />
+      <ScreenHeader title="관리자 페이지" showBack backTo="/my-page" />
       <ScrollView contentContainerClassName="gap-4 px-5 pb-8">
         <Text className="text-sm leading-6 text-ink-muted">
           보호자들의 문의를 확인하고 답변을 전해주세요.

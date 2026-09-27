@@ -63,7 +63,13 @@ export function InquiryList({ admin = false }: { admin?: boolean }) {
                   : 'rounded-full bg-paper-card px-4 py-3'
               }
             >
-              <Text className="text-sm font-semibold text-ink">{item.label}</Text>
+              <Text
+                className={`text-sm font-semibold ${
+                  filter === item.value ? 'text-[#2e2a24]' : 'text-ink'
+                }`}
+              >
+                {item.label}
+              </Text>
             </Pressable>
           ))}
         </View>

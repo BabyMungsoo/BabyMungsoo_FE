@@ -169,7 +169,7 @@ export default function TriageQuestionScreen() {
                   accessibilityRole="button"
                   className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
                 >
-                  <Text className="text-center text-base font-bold text-ink">
+                  <Text className="text-center text-base font-bold text-[#2e2a24]">
                     {completeSession.isPending ? '분석 준비 중...' : 'AI 분석 시작하기'}
                   </Text>
                 </Pressable>
@@ -284,7 +284,7 @@ function AnswerForm({ question, isBusy, isSaving, onSubmit }: AnswerFormProps) {
         accessibilityState={{ disabled: !canSubmit }}
         className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-40"
       >
-        <Text className="text-center text-base font-bold text-ink">
+        <Text className="text-center text-base font-bold text-[#2e2a24]">
           {isSaving ? '저장 중...' : '다음'}
         </Text>
       </Pressable>

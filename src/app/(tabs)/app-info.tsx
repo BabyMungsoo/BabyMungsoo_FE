@@ -10,11 +10,13 @@ const FEATURES = [
   '반려동물 프로필 관리',
 ];
 
+const DEVELOPERS = ['신희진', '박슬기', '선지오', '최유연', '노윤선'];
+
 export default function AppInfoScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScreenHeader title="앱 정보" showBack backFallback="/my-page" />
-      <ScrollView contentContainerClassName="gap-4 px-5 pb-8">
+      <ScreenHeader title="앱 정보" showBack backTo="/my-page" />
+      <ScrollView contentContainerClassName="gap-4 px-5 pb-8" showsVerticalScrollIndicator={false}>
         <View className="items-center rounded-2xl bg-paper-card px-6 py-8">
           <View className="mb-4 rounded-2xl bg-[#FFD83D] p-4">
             <Ionicons name="paw" size={36} color="#2e2a24" />
@@ -39,8 +41,17 @@ export default function AppInfoScreen() {
           <Text className="text-sm leading-6 text-ink-muted">
             본 서비스는 2026 한이음 드림업 프로젝트를 통해 개발되었습니다.
           </Text>
-          <Text className="text-sm text-ink">프로젝트 구분자: 26_HC112</Text>
-          <Text className="text-sm text-ink">개발: BabyMungsoo Team</Text>
+        </View>
+        <View className="gap-3 rounded-2xl bg-paper-card p-5">
+          <Text className="text-base font-bold text-ink">개발자 정보</Text>
+          <Text className="text-sm text-ink">동덕여자대학교 · 팀 아기멍수</Text>
+          <View className="flex-row flex-wrap gap-2">
+            {DEVELOPERS.map((name) => (
+              <View key={name} className="rounded-full bg-brand-100 px-3 py-1.5">
+                <Text className="text-sm font-semibold text-brand-900">{name}</Text>
+              </View>
+            ))}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

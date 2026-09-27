@@ -19,17 +19,18 @@ module.exports = {
           800: '#8a660e',
           900: '#5c4408',
         },
-        // 따뜻한 아이보리 계열 배경/텍스트
+        // 따뜻한 아이보리 계열 배경/텍스트 — 다크모드에서 값이 바뀌는 테마 색입니다.
+        // 실제 값은 src/constants/theme.ts 에 있고, 루트 레이아웃이 CSS 변수로 주입합니다.
         paper: {
-          DEFAULT: '#faf8f3',
-          card: '#ffffff',
-          chip: '#edeae3',
+          DEFAULT: 'rgb(var(--color-paper) / <alpha-value>)',
+          card: 'rgb(var(--color-paper-card) / <alpha-value>)',
+          chip: 'rgb(var(--color-paper-chip) / <alpha-value>)',
         },
         ink: {
-          DEFAULT: '#2e2a24',
-          muted: '#8c867a',
-          soft: '#a9a296',
-          line: '#e8e4db',
+          DEFAULT: 'rgb(var(--color-ink) / <alpha-value>)',
+          muted: 'rgb(var(--color-ink-muted) / <alpha-value>)',
+          soft: 'rgb(var(--color-ink-soft) / <alpha-value>)',
+          line: 'rgb(var(--color-ink-line) / <alpha-value>)',
         },
         // 응급도(TriageLevel)별 색상 — 백엔드 enum IMMEDIATE / WATCH / NORMAL 과 1:1 대응
         triage: {

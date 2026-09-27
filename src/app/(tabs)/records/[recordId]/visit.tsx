@@ -180,7 +180,7 @@ export default function VisitCreateScreen() {
             accessibilityState={{ disabled: !canSubmit }}
             className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-40"
           >
-            <Text className="text-center text-base font-bold text-ink">
+            <Text className="text-center text-base font-bold text-[#2e2a24]">
               {createVisit.isPending ? '저장 중...' : '저장'}
             </Text>
           </Pressable>

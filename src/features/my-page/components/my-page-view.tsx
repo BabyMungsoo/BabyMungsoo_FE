@@ -1,8 +1,10 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import AuthImage from '@/components/common/AuthImage';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { MenuDivider, MenuRow } from '@/features/my-page/components/menu-row';
+import { useThemeColors } from '@/stores/use-theme-store';
 
 export interface PetSummary {
   name: string;
@@ -60,11 +62,23 @@ export function MyPageView({
   onPressAppInfo,
   onPressAdmin,
 }: MyPageViewProps) {
+  const colors = useThemeColors();
+
   return (
     <>
       <ScreenHeader title="마이페이지" />
 
       <ScrollView className="flex-1" contentContainerClassName="gap-3 px-5 pb-5">
+        {/* 관리자 네임태그 — 관리자 메뉴가 있을 때(ADMIN)만 */}
+        {onPressAdmin && (
+          <View
+            accessibilityLabel="관리자 계정"
+            className="flex-row items-center gap-1.5 self-start rounded-full bg-ink px-3 py-1.5"
+          >
+            <Ionicons name="shield-checkmark" size={14} color="#f4cb4a" />
+            <Text className="text-xs font-bold text-paper">관리자</Text>
+          </View>
+        )}
         {statusMessage ? (
           <Text accessibilityRole="alert" className="text-sm text-red-600">
             {statusMessage}
@@ -175,18 +189,21 @@ export function MyPageView({
             label="앱 정보"
             onPress={onPressAppInfo}
           />
-          {onPressAdmin && (
-            <>
-              <MenuDivider />
-              <MenuRow
-                compact
-                icon="shield-checkmark-outline"
-                label="관리자 페이지"
-                onPress={onPressAdmin}
-              />
-            </>
-          )}
         </View>
+
+        {/* 관리자 메뉴 — ADMIN 에게만, 눈에 띄게 따로 */}
+        {onPressAdmin && (
+          <Pressable
+            onPress={onPressAdmin}
+            accessibilityRole="button"
+            className="min-h-14 flex-row items-center gap-3 rounded-2xl bg-ink px-4 py-3 active:opacity-80"
+            style={CARD_SHADOW}
+          >
+            <Ionicons name="shield-checkmark" size={20} color="#f4cb4a" />
+            <Text className="flex-1 text-sm font-bold text-paper">관리자 페이지</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.paper} />
+          </Pressable>
+        )}
         <Pressable
           accessibilityRole="button"
           disabled={loggingOut}

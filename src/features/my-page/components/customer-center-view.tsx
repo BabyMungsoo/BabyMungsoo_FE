@@ -1,15 +1,16 @@
-import { Redirect } from 'expo-router';
+import { Redirect, useFocusEffect } from 'expo-router';
 import { useCreateInquiry } from '@/hooks/queries/use-inquiries';
 import { useSessionStore } from '@/stores/use-session-store';
 import { InquiryList } from './inquiry-list';
 import PrimaryButton from '@/components/common/PrimaryButton';
 import { isInquiryMock } from '@/api/inquiries';
 import { Ionicons } from '@expo/vector-icons';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { MenuDivider, MenuRow } from '@/features/my-page/components/menu-row';
+import { useThemeColors } from '@/stores/use-theme-store';
 
 type Screen = 'menu' | 'faq' | 'inquiry' | 'history' | 'guide' | 'privacy' | 'terms';
 
@@ -51,17 +52,19 @@ const PRIVACY = `개인정보 처리방침 (서비스 화면용 예시)\n\nBabyM
 const TERMS = `서비스 이용약관 (서비스 화면용 예시)\n\n제1조 목적\n본 약관은 BabyMungsoo 서비스 이용에 관한 기본적인 사항을 정하는 것을 목적으로 합니다.\n\n제2조 서비스\n서비스는 반려동물 정보 관리, 증상 기록, AI 기반 참고 정보, 주변 동물병원 정보 등의 기능을 제공합니다.\n\n제3조 의료 관련 안내\n서비스가 제공하는 AI 분석 및 정보는 참고용이며 수의사의 전문적인 진단이나 치료를 대체하지 않습니다. 응급 상황에서는 즉시 동물병원 등 전문기관의 도움을 받아야 합니다.\n\n제4조 이용자의 의무\n이용자는 정확한 정보를 입력하고 타인의 권리를 침해하거나 서비스를 부정한 목적으로 이용해서는 안 됩니다.\n\n※ 현재 약관은 개발/시연을 위한 예시이며 실제 출시 전 서비스 정책 및 법률 검토에 따라 수정되어야 합니다.`;
 
 function DetailHeader({ title, onBack }: { title: string; onBack: () => void }) {
+  const colors = useThemeColors();
   return (
     <View className="flex-row items-center px-5 py-4">
       <Pressable onPress={onBack} className="mr-3 p-1">
-        <Ionicons name="chevron-back" size={24} color="#222" />
+        <Ionicons name="chevron-back" size={24} color={colors.ink} />
       </Pressable>
-      <Text className="text-xl font-bold text-gray-900">{title}</Text>
+      <Text className="text-xl font-bold text-ink">{title}</Text>
     </View>
   );
 }
 
 export function CustomerCenterView() {
+  const colors = useThemeColors();
   const [screen, setScreen] = useState<Screen>('menu');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [title, setTitle] = useState('');
@@ -71,6 +74,8 @@ export function CustomerCenterView() {
   const busy = useRef(false);
   const { accessToken, isHydrated } = useSessionStore();
   const goMenu = () => setScreen('menu');
+  // 탭 화면은 떠나도 언마운트되지 않아서, 다시 들어오면 보던 하위 화면(가이드 등)이 그대로 남습니다
+  useFocusEffect(useCallback(() => setScreen('menu'), []));
 
   const submitInquiry = async () => {
     if (busy.current) return;
@@ -99,7 +104,7 @@ export function CustomerCenterView() {
   if (screen === 'menu')
     return (
       <>
-        <ScreenHeader title="고객센터" showBack backFallback="/my-page" />
+        <ScreenHeader title="고객센터" showBack backTo="/my-page" />
         <ScrollView contentContainerClassName="gap-4 px-5 pb-8">
           <View className="rounded-2xl bg-paper-card" style={CARD_SHADOW}>
             <MenuRow
@@ -156,14 +161,14 @@ export function CustomerCenterView() {
               style={CARD_SHADOW}
             >
               <View className="flex-row items-center justify-between">
-                <Text className="mr-3 flex-1 font-semibold text-gray-900">Q. {q}</Text>
+                <Text className="mr-3 flex-1 font-semibold text-ink">Q. {q}</Text>
                 <Ionicons
                   name={openFaq === i ? 'chevron-up' : 'chevron-down'}
                   size={18}
-                  color="#666"
+                  color={colors.inkMuted}
                 />
               </View>
-              {openFaq === i && <Text className="mt-3 leading-6 text-gray-600">A. {a}</Text>}
+              {openFaq === i && <Text className="mt-3 leading-6 text-ink-muted">A. {a}</Text>}
             </Pressable>
           ))}
         </ScrollView>
@@ -179,7 +184,7 @@ export function CustomerCenterView() {
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
         >
-          <Text className="mb-2 font-semibold text-gray-800">문의 제목</Text>
+          <Text className="mb-2 font-semibold text-ink">문의 제목</Text>
           <TextInput
             accessibilityLabel="문의 제목"
             value={title}
@@ -187,9 +192,10 @@ export function CustomerCenterView() {
             maxLength={100}
             editable={!mutation.isPending}
             placeholder="문의 제목을 입력해 주세요"
-            className="mb-5 rounded-2xl bg-paper-card px-4 py-4 text-base"
+            className="mb-5 rounded-2xl bg-paper-card px-4 py-4 text-base text-ink"
+            placeholderTextColor={colors.inkSoft}
           />
-          <Text className="mb-2 font-semibold text-gray-800">문의 내용</Text>
+          <Text className="mb-2 font-semibold text-ink">문의 내용</Text>
           <TextInput
             accessibilityLabel="문의 내용"
             value={content}
@@ -199,10 +205,11 @@ export function CustomerCenterView() {
             placeholder="문의 내용을 자세히 입력해 주세요"
             multiline
             textAlignVertical="top"
-            className="min-h-48 rounded-2xl bg-paper-card px-4 py-4 text-base"
+            className="min-h-48 rounded-2xl bg-paper-card px-4 py-4 text-base text-ink"
+            placeholderTextColor={colors.inkSoft}
           />
           {isInquiryMock && (
-            <Text className="mt-3 text-xs leading-5 text-gray-500">
+            <Text className="mt-3 text-xs leading-5 text-ink-muted">
               체험 모드 · 문의와 답변은 이 기기에만 저장됩니다.
             </Text>
           )}
@@ -241,7 +248,7 @@ export function CustomerCenterView() {
       <DetailHeader title={page[0]} onBack={goMenu} />
       <ScrollView contentContainerClassName="px-5 pb-10">
         <View className="rounded-2xl bg-paper-card p-5" style={CARD_SHADOW}>
-          <Text className="leading-7 text-gray-700">{page[1]}</Text>
+          <Text className="leading-7 text-ink">{page[1]}</Text>
         </View>
       </ScrollView>
     </>

@@ -5,6 +5,7 @@ import { Linking, Pressable, Text, View } from 'react-native';
 import { HOSPITAL_TAG_LABEL, toHospitalTags } from '@/constants/hospital';
 import { callHospital } from '@/features/hospitals/phone';
 import { isMissing, type Hospital } from '@/types';
+import { useThemeColors } from '@/stores/use-theme-store';
 
 interface HospitalCardProps {
   hospital: Hospital;
@@ -19,6 +20,7 @@ interface HospitalCardProps {
  * 없는 값을 지어내는 대신 값이 있을 때만 그리도록 해서, 나중에 채워지면 그대로 나타납니다.
  */
 export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
+  const colors = useThemeColors();
   const phone = isMissing(hospital.phone) ? null : hospital.phone!;
   const tags = toHospitalTags(hospital.tags);
 
@@ -52,7 +54,7 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
         accessibilityLabel="병원 정보 닫기"
         className="absolute -top-3 left-3 z-10 h-7 w-7 items-center justify-center rounded-full bg-ink active:opacity-70"
       >
-        <Ionicons name="close" size={16} color="#ffffff" />
+        <Ionicons name="close" size={16} color={colors.paper} />
       </Pressable>
 
       <View className="flex-row gap-3">
@@ -134,7 +136,7 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
           accessibilityLabel="길찾기"
           className="items-center justify-center rounded-xl border border-ink-line bg-paper-card px-4 py-2 active:opacity-70"
         >
-          <Ionicons name="navigate" size={18} color="#2e2a24" />
+          <Ionicons name="navigate" size={18} color={colors.ink} />
           <Text className="mt-0.5 text-xs font-bold text-ink">길찾기</Text>
         </Pressable>
       </View>

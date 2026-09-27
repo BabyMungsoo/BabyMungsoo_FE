@@ -12,11 +12,22 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect } from 'react';
 
 import { setAuthToken } from '@/api';
+import { THEME_VARS } from '@/constants/theme';
 import { useSessionStore } from '@/stores/use-session-store';
+import { useThemeColors, useThemeStore } from '@/stores/use-theme-store';
 import { normalizeRole } from '@/types/auth';
 
 export default function RootLayout() {
   const setSession = useSessionStore((state) => state.setSession);
+  const isDark = useThemeStore((state) => state.isDark);
+  const colors = useThemeColors();
+
+  useEffect(() => {
+    useThemeStore
+      .getState()
+      .restore()
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -58,10 +69,14 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        <StatusBar style="dark" />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
 
-        <View className="flex-1 items-center bg-gray-100">
-          <View className="w-full max-w-[430px] flex-1 bg-white">
+        {/* paper·ink 테마 색(CSS 변수)을 여기서 주입합니다 — 아래 모든 화면이 따라갑니다 */}
+        <View
+          className="flex-1 items-center"
+          style={[THEME_VARS[isDark ? 'dark' : 'light'], { backgroundColor: colors.frame }]}
+        >
+          <View className="w-full max-w-[430px] flex-1 bg-paper">
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" />
               <Stack.Screen name="login" />

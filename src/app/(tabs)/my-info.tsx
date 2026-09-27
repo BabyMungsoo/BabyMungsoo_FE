@@ -298,7 +298,7 @@ export default function MyInfoScreen() {
                   >
                     <Text
                       className={`text-xs font-semibold ${
-                        (pets?.length ?? 0) <= 1 ? 'text-gray-300' : 'text-red-500'
+                        (pets?.length ?? 0) <= 1 ? 'text-ink-soft' : 'text-red-500'
                       }`}
                     >
                       삭제
@@ -320,7 +320,7 @@ export default function MyInfoScreen() {
                 },
               } as never)
             }
-            className="mt-4 h-12 items-center justify-center rounded-xl border border-brand-400 bg-white active:opacity-70"
+            className="mt-4 h-12 items-center justify-center rounded-xl border border-brand-400 bg-paper-card active:opacity-70"
           >
             <Text className="text-sm font-semibold text-brand-700">+ 반려동물 추가 등록하기</Text>
           </Pressable>
@@ -352,7 +352,7 @@ export default function MyInfoScreen() {
       >
         <View className="flex-1 items-center justify-center bg-black/30 px-5">
           <ScrollView
-            className="w-full rounded-2xl bg-white"
+            className="w-full rounded-2xl bg-paper-card"
             contentContainerClassName="p-5"
             keyboardShouldPersistTaps="handled"
             style={{
@@ -401,7 +401,7 @@ export default function MyInfoScreen() {
 
               <Pressable
                 onPress={() => setPasswordModalVisible(false)}
-                className="h-11 items-center justify-center rounded-xl active:bg-gray-100"
+                className="h-11 items-center justify-center rounded-xl active:bg-paper-chip"
               >
                 <Text className="text-sm font-semibold leading-6 text-ink-muted">취소</Text>
               </Pressable>
@@ -417,7 +417,7 @@ function Header({ title }: { title: string }) {
   return (
     <View className="relative h-14 flex-row items-center justify-center px-5">
       <Pressable
-        onPress={() => router.replace('/my-page' as never)}
+        onPress={() => router.navigate('/my-page')}
         className="absolute left-5 h-10 w-10 items-center justify-center rounded-full active:bg-black/5"
         hitSlop={8}
       >
