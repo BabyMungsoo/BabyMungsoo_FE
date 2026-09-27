@@ -34,7 +34,6 @@ export default function AccountRecoveryScreen({ mode }: { mode: RecoveryMode }) 
   const [emails, setEmails] = useState<string[] | null>(null);
   const [step, setStep] = useState<'request' | 'confirm' | 'done'>('request');
   const [pending, setPending] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
   const busy = useRef(false);
   const mounted = useRef(true);
 
@@ -44,12 +43,6 @@ export default function AccountRecoveryScreen({ mode }: { mode: RecoveryMode }) 
       mounted.current = false;
     };
   }, []);
-
-  useEffect(() => {
-    if (cooldown === 0) return;
-    const timer = setTimeout(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
-    return () => clearTimeout(timer);
-  }, [cooldown]);
 
   const runRequest = async (action: () => Promise<void>) => {
     if (busy.current) return;
@@ -71,19 +64,33 @@ export default function AccountRecoveryScreen({ mode }: { mode: RecoveryMode }) 
     }
   };
 
-  const requestMail = () => {
-    if (cooldown > 0) return;
+  // 메일 인증 없이 이메일·이름으로 계정을 확인하고, 받은 토큰은 화면에 보여주지 않고 들고만 있습니다
+  const verifyAccount = () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.trim().length > 100) {
       setError('올바른 이메일 주소를 입력해주세요.');
       return;
     }
+    if (!name.trim()) {
+      setError('가입할 때 입력한 이름을 입력해주세요.');
+      return;
+    }
     void runRequest(async () => {
-      await recoveryApi.requestReset({ email: email.trim() });
+      const resetToken = await recoveryApi.requestReset({
+        email: email.trim(),
+        name: name.trim(),
+      });
       if (!mounted.current) return;
+      setToken(resetToken);
       setStep('confirm');
-      setToken('');
-      setCooldown(60);
     });
+  };
+
+  const restartPasswordReset = () => {
+    setStep('request');
+    setToken('');
+    setPassword('');
+    setConfirmation('');
+    setError('');
   };
 
   const handleSubmit = () => {
@@ -104,10 +111,10 @@ export default function AccountRecoveryScreen({ mode }: { mode: RecoveryMode }) 
         if (mounted.current) setEmails(result.maskedEmails);
       });
     } else if (step === 'request') {
-      requestMail();
+      verifyAccount();
     } else if (step === 'confirm') {
-      if (!/^[A-Za-z0-9_-]{43}$/.test(token.trim())) {
-        setError('메일로 받은 43자리 인증 토큰을 정확히 입력해주세요.');
+      if (!token) {
+        restartPasswordReset();
         return;
       }
       if (!isValidPassword(password)) {
@@ -119,7 +126,7 @@ export default function AccountRecoveryScreen({ mode }: { mode: RecoveryMode }) 
         return;
       }
       void runRequest(async () => {
-        await recoveryApi.confirmReset({ token: token.trim(), newPassword: password });
+        await recoveryApi.confirmReset({ token, newPassword: password });
         if (!mounted.current) return;
         setToken('');
         setPassword('');
@@ -206,8 +213,8 @@ export default function AccountRecoveryScreen({ mode }: { mode: RecoveryMode }) 
                 : step === 'done'
                   ? '새 비밀번호로 다시 로그인해주세요.'
                   : step === 'confirm'
-                    ? '등록된 이메일이라면 재설정 메일이 발송됩니다.\n메일의 인증 토큰을 입력해주세요. 토큰은 15분 동안 한 번만 사용할 수 있어요.'
-                    : '가입한 이메일 주소로\n비밀번호 재설정 메일을 요청하세요.'}
+                    ? '계정이 확인됐어요.\n15분 안에 새 비밀번호를 등록해주세요.'
+                    : '가입한 이메일과 이름을 입력하면\n새 비밀번호를 등록할 수 있어요.'}
             </Text>
             <View className="mt-8 gap-5">
               {isId ? (
@@ -236,34 +243,36 @@ export default function AccountRecoveryScreen({ mode }: { mode: RecoveryMode }) 
                   />
                 </>
               ) : step === 'request' ? (
-                <AppInput
-                  label="이메일"
-                  accessibilityLabel="이메일"
-                  placeholder="example@email.com"
-                  value={email}
-                  keyboardType="email-address"
-                  autoComplete="email"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  maxLength={100}
-                  editable={!pending}
-                  onChangeText={change(setEmail)}
-                  onSubmitEditing={handleSubmit}
-                  returnKeyType="done"
-                />
-              ) : step === 'confirm' ? (
                 <>
-                  <Text className="text-sm text-gray-600">요청한 이메일: {email.trim()}</Text>
                   <AppInput
-                    label="인증 토큰"
-                    accessibilityLabel="인증 토큰"
-                    placeholder="메일로 받은 토큰을 붙여넣어 주세요"
-                    value={token}
+                    label="이메일"
+                    accessibilityLabel="이메일"
+                    placeholder="example@email.com"
+                    value={email}
+                    keyboardType="email-address"
+                    autoComplete="email"
                     autoCapitalize="none"
                     autoCorrect={false}
+                    maxLength={100}
                     editable={!pending}
-                    onChangeText={change(setToken)}
+                    onChangeText={change(setEmail)}
                   />
+                  <AppInput
+                    label="이름"
+                    accessibilityLabel="이름"
+                    placeholder="가입할 때 입력한 이름"
+                    value={name}
+                    maxLength={50}
+                    autoCorrect={false}
+                    editable={!pending}
+                    onChangeText={change(setName)}
+                    onSubmitEditing={handleSubmit}
+                    returnKeyType="done"
+                  />
+                </>
+              ) : step === 'confirm' ? (
+                <>
+                  <Text className="text-sm text-gray-600">확인된 계정: {email.trim()}</Text>
                   <AppInput
                     label="새 비밀번호"
                     accessibilityLabel="새 비밀번호"
@@ -351,46 +360,19 @@ export default function AccountRecoveryScreen({ mode }: { mode: RecoveryMode }) 
                       ? '로그인하기'
                       : step === 'confirm'
                         ? '비밀번호 변경'
-                        : '재설정 메일 요청'}
+                        : '계정 확인'}
               </Text>
             </Pressable>
             {!isId && step === 'confirm' ? (
               <View className="mt-3 gap-1">
                 <Pressable
                   accessibilityRole="button"
-                  disabled={pending || cooldown > 0}
-                  onPress={requestMail}
-                  className="min-h-12 items-center justify-center"
-                >
-                  <Text
-                    className={
-                      pending || cooldown > 0
-                        ? 'text-sm text-gray-400'
-                        : 'text-sm font-semibold text-gray-700'
-                    }
-                  >
-                    {cooldown > 0 ? `${cooldown}초 후 메일 재요청 가능` : '메일 다시 요청하기'}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
                   disabled={pending}
-                  onPress={() => {
-                    setStep('request');
-                    setToken('');
-                    setPassword('');
-                    setConfirmation('');
-                    setError('');
-                    setCooldown(0);
-                  }}
+                  onPress={restartPasswordReset}
                   className="min-h-12 items-center justify-center"
                 >
-                  <Text className="text-sm text-gray-600">이메일 다시 입력하기</Text>
+                  <Text className="text-sm text-gray-600">이메일·이름 다시 입력하기</Text>
                 </Pressable>
-                <Text className="text-xs leading-5 text-gray-500">
-                  메일이 보이지 않으면 스팸함을 확인해주세요. 새 메일이 발송되면 이전 토큰은 사용할
-                  수 없어요.
-                </Text>
               </View>
             ) : null}
             <View className="min-h-16 flex-1" />
