@@ -29,7 +29,7 @@ interface MediaUploadGridProps {
  * 사진을 고르는 즉시 POST /media/upload 로 올립니다.
  *
  * 아직 문진 세션이 없는 시점에 업로드하므로, 세션에 연결하는 건
- * "AI 분석 시작하기"를 눌러 세션을 만들 때(POST /triage/sessions 의 mediaIds) 이뤄집니다.
+ * "응급도 분석 시작하기"를 눌러 세션을 만들 때(POST /triage/sessions 의 mediaIds) 이뤄집니다.
  */
 export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
   const [items, setItems] = useState<PhotoItem[]>([]);

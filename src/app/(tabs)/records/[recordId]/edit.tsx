@@ -22,7 +22,7 @@ import { TRIAGE_LEVELS, type AnalysisRecord, type TriageLevel } from '@/types';
  * 분석기록 수정 (PATCH /records/{recordId}).
  *
  * aiResult / aiGuide 는 AI 가 만든 값이라 여기서 고치지 않습니다.
- * 사용자가 직접 적었거나 정정할 수 있는 증상·응급도·의심 질환만 수정합니다.
+ * 사용자가 직접 적었거나 정정할 수 있는 증상·응급도·판단 결과만 수정합니다.
  */
 export default function RecordEditScreen() {
   const { recordId } = useLocalSearchParams<{ recordId: string }>();
@@ -121,11 +121,11 @@ function EditForm({ record }: { record: AnalysisRecord }) {
           </View>
         </Field>
 
-        <Field label="의심 질환">
+        <Field label="판단 결과">
           <TextInput
             value={suspectedDisease}
             onChangeText={setSuspectedDisease}
-            placeholder="예: 급성 위장염 (선택)"
+            placeholder="예: 지금 바로 동물병원에 가세요 (선택)"
             placeholderTextColor="#a9a296"
             className="rounded-2xl bg-paper-card p-4 text-base text-ink"
           />

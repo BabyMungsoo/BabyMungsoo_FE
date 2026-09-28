@@ -170,7 +170,7 @@ export default function TriageQuestionScreen() {
                   className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
                 >
                   <Text className="text-center text-base font-bold text-[#2e2a24]">
-                    {completeSession.isPending ? '분석 준비 중...' : 'AI 분석 시작하기'}
+                    {completeSession.isPending ? '분석 준비 중...' : '응급도 분석 시작하기'}
                   </Text>
                 </Pressable>
               </>

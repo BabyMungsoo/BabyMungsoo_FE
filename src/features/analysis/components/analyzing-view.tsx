@@ -12,7 +12,7 @@ interface AnalyzingViewProps {
   percent: number;
 }
 
-const STEPS = ['증상 분석 중', '질병 가능성 예측 중', '결과 정리 중'] as const;
+const STEPS = ['증상 분석 중', '응급도 판단 중', '결과 정리 중'] as const;
 
 type StepState = 'done' | 'active' | 'pending';
 

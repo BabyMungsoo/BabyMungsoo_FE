@@ -169,7 +169,7 @@ export function ResultView({
               accessibilityRole="button"
               className="items-center justify-center rounded-2xl bg-paper-chip py-3.5 active:opacity-70"
             >
-              <Text className="text-sm font-bold text-ink-muted">다시 진단하기</Text>
+              <Text className="text-sm font-bold text-ink-muted">다시 분석하기</Text>
             </Pressable>
           </View>
 
