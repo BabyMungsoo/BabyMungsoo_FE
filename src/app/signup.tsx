@@ -133,7 +133,7 @@ export default function SignupScreen() {
         <ScreenHeader title="회원가입" />
 
         <View className="mt-6">
-          <Text className="text-2xl font-bold text-gray-900">아기멍수 시작하기</Text>
+          <Text className="text-2xl font-bold text-gray-900">이멍전시 시작하기</Text>
 
           <Text className="mt-2 text-sm text-gray-500">보호자 정보를 입력해주세요.</Text>
         </View>
