@@ -1,6 +1,6 @@
 # BabyMungsoo_FE
 
-반려동물 응급도 판단 서비스 **아기멍수**의 모바일 앱입니다. (Expo / React Native)
+반려동물 응급도 판단 서비스 **이멍전시**의 모바일 앱입니다. (Expo / React Native)
 
 백엔드: [BabyMungsoo_BE](https://github.com/BabyMungsoo/BabyMungsoo_BE)
 

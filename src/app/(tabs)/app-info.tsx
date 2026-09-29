@@ -21,7 +21,7 @@ export default function AppInfoScreen() {
           <View className="mb-4 rounded-2xl bg-[#FFD83D] p-4">
             <Ionicons name="paw" size={36} color="#2e2a24" />
           </View>
-          <Text className="text-2xl font-bold text-ink">BabyMungsoo</Text>
+          <Text className="text-2xl font-bold text-ink">이멍전시</Text>
           <Text className="mt-3 text-center leading-6 text-ink-muted">
             반려견의 응급 상황과 건강 관리를 돕는 AI 기반 반려동물 케어 서비스
           </Text>
