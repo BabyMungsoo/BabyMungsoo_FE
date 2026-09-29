@@ -145,7 +145,7 @@ export default function HomeScreen() {
                 ? '맞춤 질문을 준비하고 있어요...'
                 : isStarting
                   ? '분석 준비 중...'
-                  : 'AI 분석 시작하기'}
+                  : '응급도 분석 시작하기'}
             </Text>
           </Pressable>
 
