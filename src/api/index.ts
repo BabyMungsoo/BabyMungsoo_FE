@@ -6,3 +6,4 @@ export { recordsApi } from './records';
 export { reportsApi } from './reports';
 export { triageApi } from './triage';
 export { usersApi } from './users';
+export { authApi } from './auth';

@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 테마 색 기본값(라이트). 실제 테마는 루트 레이아웃이 vars() 로 덮어씁니다 — src/constants/theme.ts */
+:root {
+  --color-paper: 250 248 243;
+  --color-paper-card: 255 255 255;
+  --color-paper-chip: 237 234 227;
+  --color-ink: 46 42 36;
+  --color-ink-muted: 140 134 122;
+  --color-ink-soft: 169 162 150;
+  --color-ink-line: 232 228 219;
+}

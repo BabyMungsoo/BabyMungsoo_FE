@@ -6,3 +6,4 @@ export * from './record';
 export * from './report';
 export * from './triage';
 export * from './user';
+export * from './auth';

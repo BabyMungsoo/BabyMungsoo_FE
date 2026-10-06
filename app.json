@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "아기멍수",
+    "name": "이멍전시",
     "slug": "BabyMungsoo_FE",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,7 +10,17 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.babymungsoo.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSExceptionDomains": {
+            "daumcdn.net": {
+              "NSIncludesSubdomains": true,
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
+      }
     },
     "android": {
       "package": "com.babymungsoo.app",
@@ -42,6 +52,13 @@
         {
           "photosPermission": "반려동물 증상 사진을 첨부하려면 사진 접근 권한이 필요해요.",
           "cameraPermission": "반려동물 증상을 촬영하려면 카메라 접근 권한이 필요해요."
+        }
+      ],
+      "expo-image",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "가까운 동물병원을 찾으려면 위치 접근 권한이 필요해요."
         }
       ]
     ],

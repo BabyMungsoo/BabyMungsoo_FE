@@ -9,6 +9,7 @@ export interface Pet {
   name: string;
   breed: string;
   age: number;
+  birthDate?: string | null;
   gender: PetGender;
   weight: number | null;
   isNeutered: boolean;
@@ -23,6 +24,7 @@ export interface PetProfile {
   name: string;
   breed: string;
   age: number;
+  birthDate?: string | null;
   gender: PetGender;
   weight: number | null;
   isNeutered: boolean;
@@ -36,6 +38,7 @@ export interface PetCreateRequest {
   name: string;
   breed: string;
   age: number;
+  birthDate?: string | null;
   gender: PetGender;
   weight?: number;
   isNeutered: boolean;

@@ -34,10 +34,16 @@ export function toAbsoluteUrl(path: string | null | undefined): string | undefin
   return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
+/**
+ * Content-Type 은 기본값으로 지정하지 않습니다.
+ *
+ * axios 는 객체 바디면 application/json 을 알아서 붙이고, FormData 면 브라우저·RN 이
+ * boundary 를 포함해 설정하도록 비워 둡니다. 여기에 application/json 을 못박아 두면
+ * 파일 업로드(FormData)까지 JSON 으로 직렬화돼 버립니다.
+ */
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15_000,
-  headers: { 'Content-Type': 'application/json' },
 });
 
 /**

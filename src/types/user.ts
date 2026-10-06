@@ -4,3 +4,8 @@ export interface UserMe {
   email: string;
   name: string;
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
