@@ -13,16 +13,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
+import { TriageBadge } from '@/components/ui/triage-badge';
 import { TRIAGE_LEVEL_META, toTriageLevel } from '@/constants/triage';
 import { useRecord, useUpdateRecord } from '@/hooks/queries/use-records';
 import { confirm } from '@/lib/confirm';
-import { TRIAGE_LEVELS, type AnalysisRecord, type TriageLevel } from '@/types';
+import { type AnalysisRecord } from '@/types';
 
 /**
  * 분석기록 수정 (PATCH /records/{recordId}).
  *
- * aiResult / aiGuide 는 AI 가 만든 값이라 여기서 고치지 않습니다.
- * 사용자가 직접 적었거나 정정할 수 있는 증상·응급도·판단 결과만 수정합니다.
+ * 고칠 수 있는 값은 보호자가 직접 적은 증상뿐입니다. 응급도·판단 결과는 AI 가 내린
+ * 판정이라 읽기 전용으로만 보여 줍니다 — 보호자가 바꿀 수 있으면 '응급' 으로 판정된
+ * 기록을 '경미' 로 바꿔 둘 수 있고, 그 기록을 근거로 다음 판단을 하게 되어 위험합니다.
  */
 export default function RecordEditScreen() {
   const { recordId } = useLocalSearchParams<{ recordId: string }>();
@@ -50,22 +52,16 @@ function EditForm({ record }: { record: AnalysisRecord }) {
   const updateRecord = useUpdateRecord(record.recordId);
 
   const [symptomText, setSymptomText] = useState(record.symptomText);
-  const [level, setLevel] = useState<TriageLevel | null>(toTriageLevel(record.emergencyLevel));
-  const [suspectedDisease, setSuspectedDisease] = useState(record.suspectedDisease ?? '');
 
+  const level = toTriageLevel(record.emergencyLevel);
   const trimmedSymptom = symptomText.trim();
-  const canSave = trimmedSymptom.length > 0 && level != null && !updateRecord.isPending;
+  const canSave = trimmedSymptom.length > 0 && !updateRecord.isPending;
 
   async function handleSave() {
     if (!canSave) return;
 
     try {
-      await updateRecord.mutateAsync({
-        symptomText: trimmedSymptom,
-        emergencyLevel: level!,
-        // 비워 두면 '값 없음'으로 보냅니다
-        suspectedDisease: suspectedDisease.trim() || null,
-      });
+      await updateRecord.mutateAsync({ symptomText: trimmedSymptom });
       router.back();
     } catch (e) {
       await confirm({
@@ -96,39 +92,25 @@ function EditForm({ record }: { record: AnalysisRecord }) {
           </Text>
         </Field>
 
-        <Field label="응급도" required>
-          <View className="flex-row gap-2">
-            {TRIAGE_LEVELS.map((value) => {
-              const selected = value === level;
-              return (
-                <Pressable
-                  key={value}
-                  onPress={() => setLevel(value)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  className={`flex-1 items-center rounded-xl py-3 ${
-                    selected ? 'bg-brand-400' : 'bg-paper-chip'
-                  }`}
-                >
-                  <Text
-                    className={`text-sm font-bold ${selected ? 'text-brand-900' : 'text-ink-muted'}`}
-                  >
-                    {TRIAGE_LEVEL_META[value].shortLabel}
-                  </Text>
-                </Pressable>
-              );
-            })}
+        {/*
+          AI 판정 결과. 고치지는 못하지만 화면에서 빼지 않고 보여 줍니다 —
+          증상을 다듬을 때 '이 기록이 어떤 판정이었는지'가 함께 보여야 맥락이 맞습니다.
+        */}
+        <Field label="AI 판단 결과">
+          <View className="gap-3 rounded-2xl bg-paper-card p-4">
+            <View className="flex-row items-center gap-2">
+              {level && <TriageBadge level={level} />}
+              <Text className="flex-1 text-sm text-ink" numberOfLines={2}>
+                {record.suspectedDisease ||
+                  (level && TRIAGE_LEVEL_META[level].label) ||
+                  '분석 결과'}
+              </Text>
+            </View>
+            <Text className="text-xs leading-5 text-ink-soft">
+              응급도와 판단 결과는 AI가 분석한 값이라 수정할 수 없어요. 증상이 달라졌다면 증상을
+              고쳐 다시 분석해 주세요.
+            </Text>
           </View>
-        </Field>
-
-        <Field label="판단 결과">
-          <TextInput
-            value={suspectedDisease}
-            onChangeText={setSuspectedDisease}
-            placeholder="예: 지금 바로 동물병원에 가세요 (선택)"
-            placeholderTextColor="#a9a296"
-            className="rounded-2xl bg-paper-card p-4 text-base text-ink"
-          />
         </Field>
 
         <Pressable
