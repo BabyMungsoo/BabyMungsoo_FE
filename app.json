@@ -13,6 +13,7 @@
       "supportsTablet": false,
       "infoPlist": {
         "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoadsInWebContent": true,
           "NSExceptionDomains": {
             "daumcdn.net": {
               "NSIncludesSubdomains": true,
