@@ -161,6 +161,8 @@ export const KAKAO_MAP_SCRIPT = `
   var WHEEL_STEP_INTERVAL_MS = 150;
   var MIN_LEVEL = 1;
   var MAX_LEVEL = 14;
+  // 느린 망에서도 SDK 본체는 이 안에 받아집니다. 넘기면 못 받는 것으로 봅니다.
+  var SDK_LOAD_TIMEOUT_MS = 10000;
 
   /**
    * 휠·트랙패드 스크롤을 확대/축소로 잇습니다.
@@ -221,7 +223,15 @@ export const KAKAO_MAP_SCRIPT = `
       return;
     }
 
+    // sdk.js 는 본체(kakao.js)를 페이지와 같은 프로토콜로 받아 옵니다. baseUrl 이 http 면 본체도 http 로
+    // 요청되는데, iOS ATS 가 이를 막으면 실패 신호 없이 load 콜백만 영영 안 불려 빈 화면이 됩니다.
+    var loadTimer = setTimeout(function () {
+      post({ type: 'error', message: 'SDK_LOAD_TIMEOUT' });
+    }, SDK_LOAD_TIMEOUT_MS);
+
     kakao.maps.load(function () {
+      clearTimeout(loadTimer);
+
       // 지도를 만들면서도 idle 이 한 번 울리므로 그것도 걸러냅니다
       movedProgrammaticallyAt = Date.now();
 
@@ -264,15 +274,22 @@ export function buildKakaoMapHtml(jsKey: string, center: LatLng): string {
   html, body, #map { margin: 0; padding: 0; width: 100%; height: 100%; }
   body { background: #faf8f3; overflow: hidden; }
 </style>
+</head>
+<body>
+<div id="map"></div>
 <script>
   window.__postMapMessage = function (message) {
     if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(message);
   };
+  // WebView 안에서 난 오류는 밖에서 볼 방법이 없어 화면이 조용히 빈 채로 남는다.
+  // 밖으로 올려 보내, 적어도 지도를 못 그렸다는 사실은 사용자에게 알린다.
+  window.onerror = function (message, source, line, column) {
+    window.__postMapMessage(
+      JSON.stringify({ type: 'error', message: 'JS: ' + message + ' @' + line + ':' + column })
+    );
+  };
 </script>
 <script src="${kakaoSdkUrl(jsKey)}" onerror="window.__postMapMessage(JSON.stringify({ type: 'error', message: 'SDK_NOT_LOADED' }))"></script>
-</head>
-<body>
-<div id="map"></div>
 <script>${KAKAO_MAP_SCRIPT}</script>
 <script>window.__initMap({ lat: ${center.lat}, lng: ${center.lng}, level: 5 });</script>
 </body>
