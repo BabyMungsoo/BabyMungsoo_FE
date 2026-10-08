@@ -118,11 +118,11 @@ export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
               <Pressable
                 key={item.id}
                 onPress={() => removePhoto(item)}
-                className="h-16 w-16 overflow-hidden rounded-xl"
+                className="aspect-square flex-1 overflow-hidden rounded-xl"
               >
                 <Image
                   source={{ uri: item.localUri }}
-                  style={{ height: 64, width: 64 }}
+                  style={{ height: '100%', width: '100%' }}
                   contentFit="cover"
                 />
                 {item.status === 'uploading' && (
@@ -147,9 +147,9 @@ export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
               <Pressable
                 key="add"
                 onPress={pickPhotos}
-                className="h-16 w-16 items-center justify-center rounded-xl bg-paper-chip"
+                className="aspect-square flex-1 items-center justify-center rounded-xl bg-paper-chip"
               >
-                <Ionicons name="camera-outline" size={20} color="#8c867a" />
+                <Ionicons name="camera-outline" size={24} color="#8c867a" />
                 <Text className="mt-0.5 text-center text-[10px] leading-tight text-ink-muted">
                   사진{'\n'}업로드
                 </Text>
@@ -160,7 +160,7 @@ export function MediaUploadGrid({ onMediaIdsChange }: MediaUploadGridProps) {
           return (
             <View
               key={`empty-${index}`}
-              className="h-16 w-16 rounded-xl border border-dashed border-ink-line"
+              className="aspect-square flex-1 rounded-xl border border-dashed border-ink-line"
             />
           );
         })}

@@ -36,18 +36,18 @@ export function PetSelector({ pets, selectedPetId, onSelect }: PetSelectorProps)
   );
 
   return (
-    <View className="overflow-hidden rounded-2xl bg-paper-card" style={CARD_SHADOW}>
+    <View className="overflow-hidden rounded-xl bg-paper-card" style={CARD_SHADOW}>
       <Pressable
         onPress={() => setOpen((value) => !value)}
         accessibilityRole="button"
         accessibilityLabel="반려동물 선택"
         accessibilityState={{ expanded: open }}
-        className="flex-row items-center justify-between gap-3 px-5 py-4 active:opacity-70"
+        className="flex-row items-center justify-between gap-2 px-4 py-3 active:opacity-70"
       >
-        <Text className="flex-1 text-base font-semibold text-ink" numberOfLines={1}>
+        <Text className="flex-1 text-sm font-semibold text-ink" numberOfLines={1}>
           {selectedPet ? petSummary(selectedPet) : '반려동물을 선택해주세요'}
         </Text>
-        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color="#8c867a" />
+        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color="#8c867a" />
       </Pressable>
 
       {open && (
@@ -63,17 +63,17 @@ export function PetSelector({ pets, selectedPetId, onSelect }: PetSelectorProps)
                 }}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
-                className={`flex-row items-center justify-between gap-3 px-5 py-3 active:bg-paper-chip ${
+                className={`flex-row items-center justify-between gap-2 px-4 py-2.5 active:bg-paper-chip ${
                   selected ? 'bg-paper' : ''
                 }`}
               >
                 <Text
-                  className={`flex-1 text-base ${selected ? 'font-semibold text-ink' : 'text-ink-muted'}`}
+                  className={`flex-1 text-sm ${selected ? 'font-semibold text-ink' : 'text-ink-muted'}`}
                   numberOfLines={1}
                 >
                   {petSummary(pet)}
                 </Text>
-                {selected && <Ionicons name="checkmark" size={18} color="#d9a50f" />}
+                {selected && <Ionicons name="checkmark" size={16} color="#d9a50f" />}
               </Pressable>
             );
           })}

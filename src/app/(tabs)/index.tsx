@@ -4,7 +4,6 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BrandLogo from '@/components/common/BrandLogo';
-import { HealthTipsSection } from '@/features/home/health-tips-section';
 import { MediaUploadGrid } from '@/features/home/media-upload-grid';
 import { PetSelector } from '@/features/home/pet-selector';
 import { SymptomInput } from '@/features/home/symptom-input';
@@ -45,7 +44,7 @@ export default function HomeScreen() {
 
   const hasPets = !!pets && pets.length > 0;
 
-  const handleStartAnalysis = async () => {
+  const handleStart = async () => {
     if (!hasPets || selectedPetId == null) {
       await notify('반려동물 등록이 필요해요', '분석을 시작하려면 먼저 반려동물을 등록해주세요.');
       return;
@@ -90,16 +89,21 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
-      <ScrollView contentContainerClassName="pb-8" showsVerticalScrollIndicator={false}>
-        <View className="rounded-b-[32px] bg-brand-400 px-5 pb-10 pt-4">
-          <View className="flex-row items-start justify-between">
-            <Text className="text-2xl font-extrabold leading-tight text-[#2e2a24]">
-              우리 아이{'\n'}어디가 아프세요?
+      <ScrollView
+        contentContainerClassName="pb-6"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="rounded-b-[28px] bg-brand-400 px-5 pb-9 pt-3">
+          <View className="flex-row items-center justify-between">
+            <Text className="text-[22px] font-extrabold leading-tight text-[#2e2a24]">
+              어디가 불편해 보이나요?
             </Text>
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-paper-card">
-              <BrandLogo size={32} />
+            <View className="h-11 w-11 items-center justify-center rounded-full bg-paper-card">
+              <BrandLogo size={30} />
             </View>
           </View>
+          <Text className="mt-1 text-sm text-brand-900">증상을 적고 사진을 남겨 주세요</Text>
         </View>
 
         <View className="-mt-6 gap-4 px-5">
@@ -133,26 +137,35 @@ export default function HomeScreen() {
 
           <SymptomInput value={symptom} onChangeText={setSymptom} />
 
-          <MediaUploadGrid onMediaIdsChange={setMediaIds} />
-
-          <Pressable
-            onPress={handleStartAnalysis}
-            disabled={isStarting}
-            accessibilityRole="button"
-            className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
-          >
-            <Text className="text-center text-base font-bold text-[#2e2a24]">
-              {generateQuestions.isPending
-                ? '맞춤 질문을 준비하고 있어요...'
-                : isStarting
-                  ? '분석 준비 중...'
-                  : '응급도 분석 시작하기'}
+          <View className="gap-2">
+            <Text className="text-base font-bold text-ink">
+              사진 첨부 <Text className="text-sm font-normal text-ink-soft">(선택)</Text>
             </Text>
-          </Pressable>
-
-          <HealthTipsSection />
+            <MediaUploadGrid onMediaIdsChange={setMediaIds} />
+          </View>
         </View>
       </ScrollView>
+
+      {/* 주 기능 버튼은 스크롤과 상관없이 항상 보이도록 하단에 고정합니다 */}
+      <View className="gap-2 border-t border-ink-line bg-paper px-5 pb-3 pt-3">
+        <Pressable
+          onPress={handleStart}
+          disabled={isStarting}
+          accessibilityRole="button"
+          className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
+        >
+          <Text className="text-center text-base font-bold text-[#2e2a24]">
+            {generateQuestions.isPending
+              ? '맞춤 질문을 준비하고 있어요...'
+              : isStarting
+                ? '분석 준비 중...'
+                : '응급도 분석 시작하기'}
+          </Text>
+        </Pressable>
+        <Text className="text-center text-xs text-ink-muted">
+          최종 판단은 수의사가 해요. 이멍전시는 병원 연결을 도와요.
+        </Text>
+      </View>
     </SafeAreaView>
   );
 }

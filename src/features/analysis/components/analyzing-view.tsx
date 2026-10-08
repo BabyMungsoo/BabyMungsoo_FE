@@ -45,8 +45,11 @@ export function AnalyzingView({ percent }: AnalyzingViewProps) {
     <SafeAreaView className="flex-1 bg-paper" edges={['top']}>
       <ScreenHeader title="AI 분석 중" />
 
-      <ScrollView contentContainerClassName="items-center gap-6 px-5 pb-8 pt-6">
-        <ProgressRing percent={percent} />
+      <ScrollView
+        contentContainerClassName="items-center gap-5 px-5 pb-8 pt-4"
+        showsVerticalScrollIndicator={false}
+      >
+        <ProgressRing percent={percent} size={140} strokeWidth={12} />
 
         <View className="items-center gap-1">
           <Text className="text-base font-bold text-ink">증상을 분석하고 있어요.</Text>
@@ -61,15 +64,15 @@ export function AnalyzingView({ percent }: AnalyzingViewProps) {
             const isLast = index === STEPS.length - 1;
 
             return (
-              <View key={label} className="h-16 flex-row items-center">
+              <View key={label} className="h-12 flex-row items-center">
                 <View className="w-10 items-center justify-center self-stretch">
                   {/* 아래 단계로 이어지는 세로 연결선 */}
                   {!isLast && <View className="absolute bottom-0 top-1/2 w-px bg-ink-line" />}
                   <View
-                    className="h-7 w-7 items-center justify-center rounded-full"
+                    className="h-6 w-6 items-center justify-center rounded-full"
                     style={{ backgroundColor: STEP_STYLE[state].dot }}
                   >
-                    <Ionicons name={STEP_STYLE[state].icon} size={16} color="#ffffff" />
+                    <Ionicons name={STEP_STYLE[state].icon} size={14} color="#ffffff" />
                   </View>
                 </View>
 
@@ -81,20 +84,20 @@ export function AnalyzingView({ percent }: AnalyzingViewProps) {
                   {label}
                 </Text>
 
-                <Ionicons name={TRAILING_ICON[state]} size={18} color="#b5afa3" />
+                <Ionicons name={TRAILING_ICON[state]} size={16} color="#b5afa3" />
               </View>
             );
           })}
         </View>
 
-        <View className="w-full flex-row items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50 p-4">
+        <View className="w-full flex-row items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50 p-3">
           {/* TODO: 시안의 강아지 일러스트 자산이 들어오면 교체합니다 */}
-          <View className="h-14 w-14 items-center justify-center rounded-xl bg-brand-100">
-            <Ionicons name="paw" size={26} color="#d9a50f" />
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-brand-100">
+            <Ionicons name="paw" size={22} color="#d9a50f" />
           </View>
-          <View className="flex-1 gap-1">
-            <Text className="text-sm font-bold text-brand-800">TIP</Text>
-            <Text className="text-sm leading-5 text-ink-muted">
+          <View className="flex-1 gap-0.5">
+            <Text className="text-xs font-bold text-brand-800">TIP</Text>
+            <Text className="text-[13px] leading-5 text-ink-muted">
               정확한 분석을 위해 자세한 증상을 입력할수록 좋아요!
             </Text>
           </View>

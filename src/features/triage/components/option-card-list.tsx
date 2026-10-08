@@ -33,12 +33,12 @@ export function OptionCardList({
             disabled={disabled}
             accessibilityRole="radio"
             accessibilityState={{ checked: isSelected, disabled }}
-            className={`min-h-[52px] flex-row items-center justify-between rounded-2xl border-2 px-4 py-3 active:opacity-70 ${
+            className={`min-h-[46px] flex-row items-center justify-between rounded-xl border-2 px-3.5 py-2.5 active:opacity-70 ${
               isSelected ? 'border-brand-400 bg-brand-50' : 'border-ink-line bg-paper-card'
             }`}
           >
             <Text
-              className={`flex-1 text-base leading-6 ${isSelected ? 'font-bold text-ink' : 'text-ink'}`}
+              className={`flex-1 text-[15px] leading-[22px] ${isSelected ? 'font-bold text-ink' : 'text-ink'}`}
             >
               {option}
             </Text>

@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
@@ -97,7 +98,11 @@ export default function TriageQuestionScreen() {
     <SafeAreaView className="flex-1 bg-paper" edges={['top', 'bottom']}>
       <ScreenHeader title="추가 문진" showBack backFallback="/(tabs)" />
 
-      <ScrollView contentContainerClassName="gap-4 px-5 pb-8" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName="gap-3 px-5 pb-8"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {isLoading && (
           <View className="items-center rounded-2xl bg-paper-card p-6">
             <ActivityIndicator />
@@ -116,7 +121,7 @@ export default function TriageQuestionScreen() {
         {!isLoading && !error && (
           <>
             {/* 진행 상황 */}
-            <View className="gap-2 rounded-2xl bg-paper-card p-4">
+            <View className="gap-2 rounded-2xl bg-paper-card px-4 py-3">
               <View className="flex-row items-center justify-between">
                 <Text className="text-sm font-semibold text-ink">몇 가지만 더 여쭤볼게요</Text>
                 <Text className="text-xs text-ink-muted">
@@ -146,17 +151,12 @@ export default function TriageQuestionScreen() {
                   isBusy={isBusy}
                   isSaving={saveAnswer.isPending}
                   onSubmit={submitAnswer}
+                  onSkip={goToAnalysis}
                 />
-
-                <Pressable onPress={goToAnalysis} disabled={isBusy} accessibilityRole="button">
-                  <Text className="text-center text-sm text-ink-muted">
-                    남은 질문 건너뛰고 바로 분석하기
-                  </Text>
-                </Pressable>
               </>
             ) : (
               <>
-                <View className="gap-1 rounded-2xl bg-paper-card p-5">
+                <View className="gap-1 rounded-2xl bg-paper-card p-4">
                   <Text className="text-base font-semibold text-ink">문진이 끝났어요</Text>
                   <Text className="text-sm text-ink-muted">
                     답해주신 내용까지 함께 살펴보고 응급도를 판단할게요.
@@ -167,7 +167,7 @@ export default function TriageQuestionScreen() {
                   onPress={goToAnalysis}
                   disabled={isBusy}
                   accessibilityRole="button"
-                  className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-50"
+                  className="rounded-xl bg-brand-400 py-3.5 active:opacity-70 disabled:opacity-50"
                 >
                   <Text className="text-center text-base font-bold text-[#2e2a24]">
                     {completeSession.isPending ? '분석 준비 중...' : '응급도 분석 시작하기'}
@@ -178,7 +178,7 @@ export default function TriageQuestionScreen() {
 
             {/* 지금까지 답한 내용 — 답이 짧아졌으니 질문과 답을 한 줄에 둡니다 */}
             {answeredCount > 0 && (
-              <View className="gap-2.5 rounded-2xl bg-paper-card p-4">
+              <View className="gap-2 rounded-2xl bg-paper-card p-3.5">
                 <Text className="text-sm font-semibold text-ink-muted">지금까지 답한 내용</Text>
                 {session.data?.answers.map((item) => (
                   <View key={item.id} className="flex-row items-start justify-between gap-3">
@@ -204,13 +204,15 @@ interface AnswerFormProps {
   isBusy: boolean;
   isSaving: boolean;
   onSubmit: (content: string) => void;
+  /** 남은 질문을 건너뛰고 바로 분석으로 넘어갑니다 */
+  onSkip: () => void;
 }
 
 /**
  * 질문 하나의 답변 폼. 선택지 카드가 기본이고, '직접 입력' 을 열면 카드 선택은 버립니다.
  * 둘 다 있으면 무엇을 보낼지 애매해지기 때문입니다.
  */
-function AnswerForm({ question, isBusy, isSaving, onSubmit }: AnswerFormProps) {
+function AnswerForm({ question, isBusy, isSaving, onSubmit, onSkip }: AnswerFormProps) {
   const isChoice = question.answerType === 'CHOICE' && question.options.length > 0;
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -234,8 +236,8 @@ function AnswerForm({ question, isBusy, isSaving, onSubmit }: AnswerFormProps) {
 
   return (
     <>
-      <View className="gap-4 rounded-2xl border-2 border-brand-300 bg-paper-card p-4">
-        <Text className="text-lg font-bold leading-7 text-ink">{question.content}</Text>
+      <View className="gap-3 rounded-2xl border-2 border-brand-300 bg-paper-card p-3.5">
+        <Text className="text-base font-bold leading-6 text-ink">{question.content}</Text>
 
         {isChoice && (
           <OptionCardList
@@ -277,17 +279,25 @@ function AnswerForm({ question, isBusy, isSaving, onSubmit }: AnswerFormProps) {
         )}
       </View>
 
-      <Pressable
-        onPress={() => onSubmit(content)}
-        disabled={!canSubmit}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: !canSubmit }}
-        className="rounded-2xl bg-brand-400 py-4 active:opacity-70 disabled:opacity-40"
-      >
-        <Text className="text-center text-base font-bold text-[#2e2a24]">
-          {isSaving ? '저장 중...' : '다음'}
-        </Text>
-      </Pressable>
+      {/* 건너뛰기는 왼쪽 글씨 링크, 주 행동인 '다음' 은 오른쪽 작은 버튼 */}
+      <View className="flex-row items-center justify-between gap-3">
+        <Pressable onPress={onSkip} disabled={isBusy} hitSlop={8} accessibilityRole="button">
+          <Text className="text-sm text-ink-muted underline">남은 질문 건너뛰기</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => onSubmit(content)}
+          disabled={!canSubmit}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !canSubmit }}
+          className="min-h-[44px] min-w-[96px] flex-row items-center justify-center gap-1 rounded-full bg-brand-400 px-5 active:opacity-70 disabled:opacity-40"
+        >
+          <Text className="text-[15px] font-bold text-[#2e2a24]">
+            {isSaving ? '저장 중...' : '다음'}
+          </Text>
+          {!isSaving && <Ionicons name="chevron-forward" size={16} color="#2e2a24" />}
+        </Pressable>
+      </View>
     </>
   );
 }
