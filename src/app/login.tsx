@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { setAuthToken } from '@/api';
 import AppInput from '@/components/common/AppInput';
+import BrandLogo from '@/components/common/BrandLogo';
 import PrimaryButton from '@/components/common/PrimaryButton';
 import { useLogin } from '@/hooks/queries/use-auth';
 import { useSessionStore } from '@/stores/use-session-store';
@@ -73,11 +74,9 @@ export default function LoginScreen() {
       >
         {/* 상단 노란 영역 */}
         <View className="h-[230px] items-center justify-end bg-[#FFD83D]">
-          <Image
-            source={require('../../assets/images/icons/main-dog.png')}
-            style={{ width: 150, height: 150 }}
-            resizeMode="contain"
-          />
+          <View className="pb-8">
+            <BrandLogo size={130} />
+          </View>
         </View>
 
         <View className="flex-1 px-6 pt-10">

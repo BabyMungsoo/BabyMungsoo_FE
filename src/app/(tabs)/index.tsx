@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import BrandLogo from '@/components/common/BrandLogo';
 import { HealthTipsSection } from '@/features/home/health-tips-section';
 import { MediaUploadGrid } from '@/features/home/media-upload-grid';
 import { PetSelector } from '@/features/home/pet-selector';
@@ -96,7 +97,7 @@ export default function HomeScreen() {
               우리 아이{'\n'}어디가 아프세요?
             </Text>
             <View className="h-12 w-12 items-center justify-center rounded-full bg-paper-card">
-              <Text className="text-2xl">🐶</Text>
+              <BrandLogo size={32} />
             </View>
           </View>
         </View>
