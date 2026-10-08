@@ -1,7 +1,8 @@
-import { Tabs } from 'expo-router';
-import { Image } from 'react-native';
+import { Redirect, Tabs } from 'expo-router';
+import { ActivityIndicator, Image, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useSessionStore } from '@/stores/use-session-store';
 import { useThemeColors } from '@/stores/use-theme-store';
 
 /** 아이콘 + 라벨이 눌리지 않고 들어가는 최소 높이. 여기에 하단 인셋을 더해 씁니다. */
@@ -19,6 +20,20 @@ export default function TabLayout() {
   // 웹은 하단 인셋이 0이라 라벨이 화면 끝에 붙어 잘린다. 최소 12px를 보장한다.
   const bottomInset = Math.max(insets.bottom, 12);
   const colors = useThemeColors();
+  const isHydrated = useSessionStore((state) => state.isHydrated);
+  const accessToken = useSessionStore((state) => state.accessToken);
+
+  // 새로고침하면 루트 레이아웃이 저장된 세션을 비동기로 복원합니다. 그 전에 탭 화면을 그리면
+  // 토큰 없이 API 를 불러 401 이 나서 로그인이 풀린 것처럼 보이므로, 복원이 끝날 때까지 기다립니다.
+  if (!isHydrated) {
+    return (
+      <View className="flex-1 items-center justify-center bg-paper">
+        <ActivityIndicator />
+      </View>
+    );
+  }
+  // '로그인 상태 유지'를 안 했거나 로그아웃한 상태로 탭 주소에 바로 들어오면 로그인으로 보냅니다.
+  if (!accessToken) return <Redirect href="/login" />;
 
   return (
     <Tabs

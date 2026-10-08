@@ -3,15 +3,22 @@ import { useEffect, useState } from 'react';
 import { Animated, Text, View } from 'react-native';
 
 import BrandLogo from '@/components/common/BrandLogo';
+import { useSessionStore } from '@/stores/use-session-store';
 
 /** 스플래시를 보여주는 시간(ms) — 로고·문구가 다 뜨고 읽을 시간까지 포함합니다 */
 const SPLASH_DURATION = 2600;
 
 /**
- * 앱 첫 화면 — 노란 배경에 로고가 뜨고, 이어서 소개 문구가 뜬 뒤 로그인으로 넘깁니다.
+ * 앱 첫 화면 — 노란 배경에 로고가 뜨고, 이어서 소개 문구가 뜬 뒤 넘어갑니다.
+ *
+ * '로그인 상태 유지'로 저장된 세션이 있으면 홈으로, 없으면 로그인으로 보냅니다.
+ * 세션 복원(루트 레이아웃)이 스플래시보다 늦게 끝날 수 있어, 둘 다 끝난 뒤에 이동합니다.
  */
 export default function Index() {
   const router = useRouter();
+  const isHydrated = useSessionStore((state) => state.isHydrated);
+  const accessToken = useSessionStore((state) => state.accessToken);
+  const [isSplashDone, setIsSplashDone] = useState(false);
   const [logoOpacity] = useState(() => new Animated.Value(0));
   const [taglineOpacity] = useState(() => new Animated.Value(0));
 
@@ -21,9 +28,14 @@ export default function Index() {
       Animated.timing(taglineOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
     ]).start();
 
-    const timer = setTimeout(() => router.replace('/login'), SPLASH_DURATION);
+    const timer = setTimeout(() => setIsSplashDone(true), SPLASH_DURATION);
     return () => clearTimeout(timer);
-  }, [logoOpacity, taglineOpacity, router]);
+  }, [logoOpacity, taglineOpacity]);
+
+  useEffect(() => {
+    if (!isSplashDone || !isHydrated) return;
+    router.replace(accessToken ? ('/(tabs)' as never) : '/login');
+  }, [isSplashDone, isHydrated, accessToken, router]);
 
   return (
     <View className="flex-1 items-center justify-center bg-brand-500 pb-16">
