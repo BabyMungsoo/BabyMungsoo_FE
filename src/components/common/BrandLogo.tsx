@@ -41,8 +41,7 @@ export default function BrandLogo({ size, variant = 'mark' }: BrandLogoProps) {
         cy={282}
         rx={56}
         ry={96}
-        rotation={22}
-        origin="161, 282"
+        transform="rotate(22 161 282)"
         fill={LOGO_COLORS.ink}
       />
       <Ellipse
@@ -50,8 +49,7 @@ export default function BrandLogo({ size, variant = 'mark' }: BrandLogoProps) {
         cy={282}
         rx={56}
         ry={96}
-        rotation={-22}
-        origin="415, 282"
+        transform="rotate(-22 415 282)"
         fill={LOGO_COLORS.ink}
       />
 
