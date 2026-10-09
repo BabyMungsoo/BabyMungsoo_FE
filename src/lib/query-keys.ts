@@ -34,6 +34,10 @@ export const queryKeys = {
     recommend: (params: HospitalRecommendParams) => ['hospitals', 'recommend', params] as const,
     nearest: (params: HospitalNearestParams) => ['hospitals', 'nearest', params] as const,
   },
+  favorites: {
+    /** 사용자별로 저장되므로 userId 를 키에 넣어 계정이 바뀌면 다시 읽습니다 */
+    hospitals: (userId: number | null) => ['favorites', 'hospitals', userId] as const,
+  },
   records: {
     all: ['records'] as const,
     list: () => ['records', 'list'] as const,

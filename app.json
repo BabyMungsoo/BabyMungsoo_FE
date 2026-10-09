@@ -13,6 +13,7 @@
       "supportsTablet": false,
       "infoPlist": {
         "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoadsInWebContent": true,
           "NSExceptionDomains": {
             "daumcdn.net": {
               "NSIncludesSubdomains": true,
@@ -42,7 +43,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#EFBE24",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }

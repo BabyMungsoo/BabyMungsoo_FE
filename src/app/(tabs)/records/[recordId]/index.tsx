@@ -117,21 +117,42 @@ export default function RecordDetailScreen() {
         title="분석 결과"
         showBack
         backFallback="/records"
+        // 수정·공유·삭제 아이콘 세 개가 들어가도록 양쪽 칸을 넓힙니다
+        sideWidth={100}
         right={
           record && (
-            <Pressable
-              onPress={handleDelete}
-              disabled={deleteRecord.isPending}
-              hitSlop={12}
-              accessibilityRole="button"
-              accessibilityLabel="분석기록 삭제"
-            >
-              {deleteRecord.isPending ? (
-                <ActivityIndicator size="small" color="#8c867a" />
-              ) : (
-                <Ionicons name="trash-outline" size={22} color="#8c867a" />
-              )}
-            </Pressable>
+            <View className="flex-row items-center gap-4">
+              <Pressable
+                onPress={() => router.push(`/records/${record.recordId}/edit`)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="기록 수정"
+              >
+                <Ionicons name="create-outline" size={22} color="#8c867a" />
+              </Pressable>
+              {/* TODO: 리포트 생성(POST /reports)은 hospitalId 가 필요해서 9번에서 병원을 고른 뒤에 붙입니다 */}
+              <Pressable
+                onPress={() => {}}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="공유하기"
+              >
+                <Ionicons name="share-outline" size={22} color="#8c867a" />
+              </Pressable>
+              <Pressable
+                onPress={handleDelete}
+                disabled={deleteRecord.isPending}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="분석기록 삭제"
+              >
+                {deleteRecord.isPending ? (
+                  <ActivityIndicator size="small" color="#8c867a" />
+                ) : (
+                  <Ionicons name="trash-outline" size={22} color="#8c867a" />
+                )}
+              </Pressable>
+            </View>
           )
         }
       />
@@ -159,9 +180,6 @@ export default function RecordDetailScreen() {
         <RecordDetailView
           record={record}
           photoUrls={photoUrls}
-          onPressEdit={() => router.push(`/records/${record.recordId}/edit`)}
-          // TODO: 리포트 생성(POST /reports)은 hospitalId 가 필요해서 9번에서 병원을 고른 뒤에 붙입니다
-          onPressShare={() => {}}
           // 응급도를 넘겨야 9번에서 그 등급에 맞는 병원을 추천받습니다
           onPressFindHospital={() =>
             router.push({

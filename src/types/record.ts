@@ -96,11 +96,11 @@ export interface AnalysisRecordCreateRequest {
 /**
  * PATCH /api/v1/records/{recordId} — 보낸 필드만 수정됩니다.
  *
- * aiResult/aiGuide 는 AI 가 만든 값이라 사용자가 고치지 않습니다.
- * 사용자가 직접 입력했거나 정정할 수 있는 값만 열어 둡니다.
+ * 고칠 수 있는 값은 보호자가 직접 적은 증상뿐입니다.
+ * 응급도·의심질환·aiResult·aiGuide 는 모두 AI 가 판단한 값이라 보내지 않습니다 —
+ * 보호자가 바꿀 수 있으면 '응급' 으로 판정된 기록을 '경미' 로 바꿔 둘 수 있고,
+ * 그 기록을 근거로 다음 판단을 하게 되어 위험합니다.
  */
 export interface AnalysisRecordUpdateRequest {
   symptomText?: string;
-  emergencyLevel?: string;
-  suspectedDisease?: string | null;
 }

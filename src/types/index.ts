@@ -1,4 +1,5 @@
 export * from './common';
+export * from './favorite';
 export * from './hospital';
 export * from './media';
 export * from './pet';
