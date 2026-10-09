@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AiDisclaimer } from '@/components/ui/ai-disclaimer';
 import { PhotoStrip } from '@/components/ui/photo-strip';
 import { TriageBadge } from '@/components/ui/triage-badge';
-import { toTriageLevel } from '@/constants/triage';
+import { TRIAGE_LEVEL_META, toTriageLevel } from '@/constants/triage';
 import type { TriageAnalyzeResult, TriageLevel } from '@/types';
 
 /** 등급 배너 색. 배경은 옅게, 글자는 진하게 — 같은 계열이라 뱃지(bg-triage-*)와 어울립니다. */
@@ -84,8 +84,19 @@ export function ResultView({
             className="gap-2 rounded-2xl border-2 p-3.5"
             style={{ backgroundColor: style.bg, borderColor: style.border }}
           >
-            <View className="flex-row items-center">
-              <TriageBadge level={level} variant="long" />
+            <View className="flex-row items-center gap-2.5">
+              <View
+                className="h-11 w-11 items-center justify-center rounded-full"
+                style={{ backgroundColor: style.border }}
+              >
+                <Ionicons name={TRIAGE_LEVEL_META[level].icon} size={26} color="#ffffff" />
+              </View>
+              <View className="gap-1">
+                <TriageBadge level={level} variant="long" />
+                <Text className="text-xs font-semibold" style={{ color: style.fg }}>
+                  {TRIAGE_LEVEL_META[level].description}
+                </Text>
+              </View>
             </View>
             <Text className="text-lg font-bold leading-6" style={{ color: style.fg }}>
               {result.title}

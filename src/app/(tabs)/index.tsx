@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import AuthImage from '@/components/common/AuthImage';
 import BrandLogo from '@/components/common/BrandLogo';
 import { MediaUploadGrid } from '@/features/home/media-upload-grid';
 import { PetSelector } from '@/features/home/pet-selector';
@@ -14,6 +15,7 @@ import {
   useGenerateTriageQuestions,
 } from '@/hooks/queries/use-triage';
 import { notify } from '@/lib/confirm';
+import { topicParticle } from '@/lib/format';
 import { usePetStore } from '@/stores/use-pet-store';
 
 /**
@@ -43,6 +45,7 @@ export default function HomeScreen() {
   }, [pets, selectedPetId, selectPet]);
 
   const hasPets = !!pets && pets.length > 0;
+  const selectedPet = pets?.find((pet) => pet.petId === selectedPetId);
 
   const handleStart = async () => {
     if (!hasPets || selectedPetId == null) {
@@ -94,16 +97,35 @@ export default function HomeScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="rounded-b-[28px] bg-brand-400 px-5 pb-9 pt-3">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-[22px] font-extrabold leading-tight text-[#2e2a24]">
-              어디가 불편해 보이나요?
-            </Text>
-            <View className="h-11 w-11 items-center justify-center rounded-full bg-paper-card">
-              <BrandLogo size={30} />
+        <View className="rounded-b-[28px] bg-brand-400 px-5 pb-9 pt-4">
+          <View className="flex-row items-center justify-between gap-4">
+            <View className="flex-1">
+              {/*
+                지금 문진할 아이를 이름으로 불러 줍니다. 크기는 같게 두고 이름만
+                굵기로 구분해 튀지 않게 하고, 폰에서 꽉 차 보이지 않도록 이름 뒤에서 줄을 바꿉니다.
+              */}
+              <Text className="text-xl font-semibold leading-7 text-[#2e2a24]">
+                {selectedPet && (
+                  <>
+                    <Text className="font-extrabold">{selectedPet.name}</Text>
+                    {topicParticle(selectedPet.name)}
+                    {'\n'}
+                  </>
+                )}
+                어디가 불편해 보이나요?
+              </Text>
+              <Text className="mt-1.5 text-sm text-brand-900">증상을 적고 사진을 남겨 주세요</Text>
+            </View>
+
+            {/* 프로필 사진이 있으면 그 아이의 얼굴, 없으면 로고 강아지 */}
+            <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-full border-[3px] border-paper-card bg-paper-card">
+              {selectedPet?.profileImage ? (
+                <AuthImage path={selectedPet.profileImage} className="h-full w-full" />
+              ) : (
+                <BrandLogo size={42} />
+              )}
             </View>
           </View>
-          <Text className="mt-1 text-sm text-brand-900">증상을 적고 사진을 남겨 주세요</Text>
         </View>
 
         <View className="-mt-6 gap-4 px-5">
