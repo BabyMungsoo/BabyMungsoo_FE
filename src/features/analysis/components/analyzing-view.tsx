@@ -12,7 +12,7 @@ interface AnalyzingViewProps {
   percent: number;
 }
 
-const STEPS = ['증상 분석 중', '응급도 판단 중', '결과 정리 중'] as const;
+const STEPS = ['증상 확인 중', '응급도 판단 중', '결과 정리 중'] as const;
 
 type StepState = 'done' | 'active' | 'pending';
 
@@ -52,7 +52,7 @@ export function AnalyzingView({ percent }: AnalyzingViewProps) {
         <ProgressRing percent={percent} size={140} strokeWidth={12} />
 
         <View className="items-center gap-1">
-          <Text className="text-base font-bold text-ink">증상을 분석하고 있어요.</Text>
+          <Text className="text-base font-bold text-ink">응급도를 분석하고 있어요.</Text>
           <Text className="text-sm text-ink-muted">잠시만 기다려주세요.</Text>
           {/* 결과가 나오기 전에 먼저 읽히게 여기에도 둡니다 */}
           <AiDisclaimer variant="compact" className="mt-2" />
