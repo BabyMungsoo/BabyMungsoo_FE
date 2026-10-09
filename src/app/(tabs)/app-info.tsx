@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '@/components/ui/screen-header';
 
 const FEATURES = [
-  'AI 기반 반려견 증상 분석',
+  'AI 기반 반려견 응급도 판단',
   '반려동물 건강 및 진료 기록 관리',
   '주변 동물병원 정보 제공',
   '반려동물 프로필 관리',

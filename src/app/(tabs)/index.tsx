@@ -148,7 +148,7 @@ export default function HomeScreen() {
             <View className="gap-1 rounded-2xl bg-paper-card p-5">
               <Text className="text-base font-semibold text-ink">등록된 반려동물이 없어요</Text>
               <Text className="text-sm text-ink-muted">
-                반려동물을 먼저 등록하면 증상을 분석할 수 있어요.
+                반려동물을 먼저 등록하면 응급도를 확인할 수 있어요.
               </Text>
             </View>
           )}
