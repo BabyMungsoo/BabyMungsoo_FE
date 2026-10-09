@@ -1,3 +1,6 @@
+import type Ionicons from '@expo/vector-icons/Ionicons';
+import type { ComponentProps } from 'react';
+
 import { TRIAGE_LEVELS, type TriageLevel } from '@/types';
 
 /** 응급도 표시용 라벨/색상. 백엔드 TriageLevel enum 과 값이 1:1 로 맞습니다. */
@@ -11,6 +14,11 @@ export const TRIAGE_LEVEL_META: Record<
     description: string;
     /** 배경색 클래스 */
     className: string;
+    /** 진한 색 (tailwind triage-* 와 같은 값). 아이콘·띠처럼 className 을 못 쓰는 곳에 씁니다 */
+    color: string;
+    /** 옅은 배경색. 아이콘 원·카드 배경에 씁니다 */
+    softColor: string;
+    icon: ComponentProps<typeof Ionicons>['name'];
   }
 > = {
   IMMEDIATE: {
@@ -18,6 +26,9 @@ export const TRIAGE_LEVEL_META: Record<
     shortLabel: '응급',
     description: '지금 바로 병원에 가야 하는 상태예요.',
     className: 'bg-triage-immediate',
+    color: '#e03131',
+    softColor: '#fdecec',
+    icon: 'alert-circle',
   },
   WATCH: {
     label: '주의 관찰',
@@ -26,12 +37,18 @@ export const TRIAGE_LEVEL_META: Record<
     // "지켜보다 나빠지면" 은 그보다 약해서 보호자가 진료를 미루게 만들었습니다.
     description: '빠른 시일 내 병원 진료가 필요해요.',
     className: 'bg-triage-watch',
+    color: '#e0a800',
+    softColor: '#fdf4e0',
+    icon: 'warning',
   },
   NORMAL: {
     label: '일반 관리',
     shortLabel: '경미',
     description: '집에서 관리해도 괜찮은 상태예요.',
     className: 'bg-triage-normal',
+    color: '#74b85a',
+    softColor: '#eef7ea',
+    icon: 'checkmark-circle',
   },
 };
 
