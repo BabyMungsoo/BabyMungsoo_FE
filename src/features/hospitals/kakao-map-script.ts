@@ -85,16 +85,15 @@ export const KAKAO_MAP_SCRIPT = `
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
 
-  // 카카오 지도 바탕에는 색색의 POI 아이콘이 빽빽해서, 연한 마커는 그대로 묻힙니다.
-  // 그래서 둘 다 진한 먹색 외곽선을 두르고, 선택된 쪽은 크기와 채도로 한 번 더 벌립니다.
-  //   기본   흰 바탕 + 노란 발바닥 (작음)
-  //   선택   노란 바탕 + 흰 발바닥 (큼)
+  // 둘 다 브랜드 노랑 핀에 외곽선 없이 그립니다. 선택된 쪽은 크기와 발바닥 색으로 구분합니다.
+  //   기본   노란 바탕 + 흰 발바닥 (작음)
+  //   선택   노란 바탕 + 먹색 발바닥 (큼)
+  // viewBox 는 그대로 두고 width/height 만 줄여 축소합니다.
 
   var SELECTED_SVG =
-    '<svg xmlns="http://www.w3.org/2000/svg" width="52" height="64" viewBox="0 0 52 64">' +
-    '<path d="M26 62.5C26 62.5 49 41 49 25A23 23 0 1 0 3 25C3 41 26 62.5 26 62.5Z" ' +
-    'fill="#EFBE24" stroke="#2E2A24" stroke-width="2.5" stroke-linejoin="round"/>' +
-    '<g fill="#FFFFFF">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 52 64">' +
+    '<path d="M26 62.5C26 62.5 49 41 49 25A23 23 0 1 0 3 25C3 41 26 62.5 26 62.5Z" fill="#EFBE24"/>' +
+    '<g fill="#2E2A24">' +
     '<ellipse cx="18" cy="21" rx="3.4" ry="4.6"/>' +
     '<ellipse cx="26" cy="18.6" rx="3.4" ry="4.8"/>' +
     '<ellipse cx="34" cy="21" rx="3.4" ry="4.6"/>' +
@@ -102,11 +101,9 @@ export const KAKAO_MAP_SCRIPT = `
     '</g></svg>';
 
   var DEFAULT_SVG =
-    '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="44" viewBox="0 0 34 44">' +
-    '<path d="M17 42.5C17 42.5 32 27.5 32 16.5A15 15 0 1 0 2 16.5C2 27.5 17 42.5 17 42.5Z" ' +
-    'fill="#FFFFFF" stroke="#2E2A24" stroke-width="2" stroke-linejoin="round"/>' +
-    // 흰 바탕에 얹히므로 밝은 노랑(#EFBE24)은 34px 로 줄면 뭉갭니다 — 진한 호박색으로 낮춥니다
-    '<g fill="#B0830C">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="34" viewBox="0 0 34 44">' +
+    '<path d="M17 42.5C17 42.5 32 27.5 32 16.5A15 15 0 1 0 2 16.5C2 27.5 17 42.5 17 42.5Z" fill="#EFBE24"/>' +
+    '<g fill="#FFFFFF">' +
     '<ellipse cx="11.8" cy="13.8" rx="2.3" ry="3.1"/>' +
     '<ellipse cx="17" cy="12.2" rx="2.3" ry="3.2"/>' +
     '<ellipse cx="22.2" cy="13.8" rx="2.3" ry="3.1"/>' +
@@ -116,12 +113,12 @@ export const KAKAO_MAP_SCRIPT = `
   function imageFor(isSelected) {
     // offset 은 이미지에서 좌표에 붙일 지점 — 핀이라 뾰족한 아래 끝을 찍습니다
     if (isSelected) {
-      return new kakao.maps.MarkerImage(svgUrl(SELECTED_SVG), new kakao.maps.Size(52, 64), {
-        offset: new kakao.maps.Point(26, 63)
+      return new kakao.maps.MarkerImage(svgUrl(SELECTED_SVG), new kakao.maps.Size(40, 50), {
+        offset: new kakao.maps.Point(20, 49)
       });
     }
-    return new kakao.maps.MarkerImage(svgUrl(DEFAULT_SVG), new kakao.maps.Size(34, 44), {
-      offset: new kakao.maps.Point(17, 43)
+    return new kakao.maps.MarkerImage(svgUrl(DEFAULT_SVG), new kakao.maps.Size(26, 34), {
+      offset: new kakao.maps.Point(13, 33)
     });
   }
 

@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { Linking, Pressable, Text, View } from 'react-native';
 
 import { HOSPITAL_TAG_LABEL, toHospitalTags } from '@/constants/hospital';
+import { FavoriteButton } from '@/features/hospitals/components/favorite-button';
 import { callHospital } from '@/features/hospitals/phone';
 import { isMissing, type Hospital } from '@/types';
 import { useThemeColors } from '@/stores/use-theme-store';
@@ -70,9 +71,12 @@ export function HospitalCard({ hospital, onClose }: HospitalCardProps) {
         )}
 
         <View className="flex-1 gap-1">
-          <Text className="text-base font-bold text-ink" numberOfLines={2}>
-            {hospital.hospitalName}
-          </Text>
+          <View className="flex-row items-start gap-2">
+            <Text className="flex-1 text-base font-bold text-ink" numberOfLines={2}>
+              {hospital.hospitalName}
+            </Text>
+            <FavoriteButton hospital={hospital} />
+          </View>
 
           {hospital.rating != null && (
             <RatingRow rating={hospital.rating} reviewCount={hospital.reviewCount} />

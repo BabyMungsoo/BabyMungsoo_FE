@@ -13,8 +13,6 @@ interface RecordDetailViewProps {
   record: AnalysisRecord;
   /** record.mediaIds 로 받아온 media 들을 절대 경로로 바꾼 값. 컨테이너(라우트)가 조회해서 넘깁니다 */
   photoUrls?: string[];
-  onPressEdit: () => void;
-  onPressShare: () => void;
   onPressFindHospital: () => void;
   /** 이 기록에 달린 팔로우업 답변들 */
   visits?: HospitalVisit[];
@@ -46,8 +44,6 @@ interface RecordDetailViewProps {
 export function RecordDetailView({
   record,
   photoUrls = [],
-  onPressEdit,
-  onPressShare,
   onPressFindHospital,
   visits = [],
   visitsError,
@@ -87,8 +83,6 @@ export function RecordDetailView({
         <Text className="mt-2 text-xs text-ink-soft">
           분석일 {formatDateTime(record.createdAt)}
         </Text>
-
-        <AiDisclaimer className="mt-3" />
 
         {symptoms.length > 0 && (
           <Section title="주요 증상">
@@ -165,18 +159,16 @@ export function RecordDetailView({
         </View>
       )}
 
-      <View className="mt-4 flex-row gap-3">
-        <SecondaryButton label="기록 수정" onPress={onPressEdit} />
-        <SecondaryButton label="공유하기" onPress={onPressShare} />
-      </View>
-
       <Pressable
         onPress={onPressFindHospital}
         accessibilityRole="button"
-        className="mt-3 items-center rounded-2xl bg-brand-400 py-4 active:opacity-70"
+        className="mt-4 items-center rounded-2xl bg-brand-400 py-4 active:opacity-70"
       >
         <Text className="text-base font-bold text-brand-900">병원 찾기</Text>
       </Pressable>
+
+      {/* AI 고지 — 결과 화면(4번)과 같이 박스 없이 맨 아래에 둡니다 */}
+      <AiDisclaimer variant="footnote" className="mt-4" />
     </ScrollView>
   );
 }
@@ -188,18 +180,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <Text className="mb-3 text-base font-bold text-ink">{title}</Text>
       {children}
     </View>
-  );
-}
-
-function SecondaryButton({ label, onPress }: { label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      className="flex-1 items-center rounded-2xl border border-ink-line bg-paper-card py-3.5 active:opacity-70"
-    >
-      <Text className="text-sm font-bold text-ink-muted">{label}</Text>
-    </Pressable>
   );
 }
 

@@ -4,8 +4,11 @@ import { Text, View } from 'react-native';
 import { AI_DISCLAIMER, AI_DISCLAIMER_SHORT } from '@/constants/disclaimer';
 
 interface AiDisclaimerProps {
-  /** 'card' = 결과 옆에 두는 회색 카드(4·7번), 'compact' = 한 줄(8·6번) */
-  variant?: 'card' | 'compact';
+  /**
+   * 'card' = 회색 카드, 'compact' = 한 줄(8·6번),
+   * 'footnote' = 결과 화면(4·7번) 맨 아래에 두는 박스 없는 작은 글씨
+   */
+  variant?: 'card' | 'compact' | 'footnote';
   className?: string;
 }
 
@@ -18,6 +21,20 @@ interface AiDisclaimerProps {
  * 닫기 버튼은 없습니다. 닫히면 고지로서 의미가 없습니다.
  */
 export function AiDisclaimer({ variant = 'card', className = '' }: AiDisclaimerProps) {
+  if (variant === 'footnote') {
+    return (
+      <View accessibilityRole="text" className={`flex-row items-start gap-1.5 px-1 ${className}`}>
+        <Ionicons
+          name="information-circle-outline"
+          size={14}
+          color="#a9a296"
+          style={{ marginTop: 3 }}
+        />
+        <Text className="flex-1 text-xs leading-5 text-ink-soft">{AI_DISCLAIMER}</Text>
+      </View>
+    );
+  }
+
   if (variant === 'compact') {
     return (
       <View

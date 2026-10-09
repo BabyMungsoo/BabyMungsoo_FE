@@ -55,8 +55,8 @@ export function ProgressRing({ percent, size = 176, strokeWidth = 14 }: Progress
       </Svg>
 
       <View className="flex-row items-baseline">
-        <Text className="text-5xl font-bold text-ink">{clamped}</Text>
-        <Text className="ml-0.5 text-xl font-bold text-ink">%</Text>
+        <Text className="text-4xl font-bold text-ink">{clamped}</Text>
+        <Text className="ml-0.5 text-lg font-bold text-ink">%</Text>
       </View>
     </View>
   );

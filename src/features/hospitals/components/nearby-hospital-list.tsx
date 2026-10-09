@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
+import { FavoriteButton } from '@/features/hospitals/components/favorite-button';
 import { distanceKm, formatDistance } from '@/features/hospitals/distance';
 import { callHospital } from '@/features/hospitals/phone';
 import { toHospitalLevel } from '@/features/hospitals/to-hospital-level';
@@ -157,6 +158,8 @@ function HospitalRow({
           {hospital.address}
         </Text>
       </Pressable>
+
+      <FavoriteButton hospital={hospital} />
 
       {/* 전화가 '정보 없음'인 병원은 버튼을 회색으로 두어 눌러도 되는지 헷갈리지 않게 합니다 */}
       <Pressable

@@ -20,6 +20,11 @@ interface ScreenHeaderProps {
   backTo?: Href;
   /** 오른쪽 액션 (예: 삭제 아이콘). 없으면 타이틀 중앙 정렬을 위해 빈 자리로 둡니다 */
   right?: React.ReactNode;
+  /**
+   * 양쪽 칸 너비(px). 오른쪽에 아이콘을 여러 개 둘 때 넓힙니다.
+   * 타이틀이 정중앙에 오도록 왼쪽 칸도 같은 너비로 맞춥니다.
+   */
+  sideWidth?: number;
 }
 
 /** 가운데 정렬 타이틀 헤더. 뒤로가기가 있어도 타이틀은 화면 정중앙에 오게 양쪽 폭을 맞춥니다. */
@@ -29,6 +34,7 @@ export function ScreenHeader({
   backFallback,
   backTo,
   right,
+  sideWidth = 40,
 }: ScreenHeaderProps) {
   const router = useRouter();
   const colors = useThemeColors();
@@ -48,7 +54,7 @@ export function ScreenHeader({
 
   return (
     <View className="h-14 flex-row items-center px-4">
-      <View className="w-10 items-start">
+      <View className="items-start" style={{ width: sideWidth }}>
         {showBack && (
           <Pressable
             onPress={handleBack}
@@ -63,7 +69,9 @@ export function ScreenHeader({
 
       <Text className="flex-1 text-center text-lg font-bold text-ink">{title}</Text>
 
-      <View className="w-10 items-end">{right}</View>
+      <View className="items-end" style={{ width: sideWidth }}>
+        {right}
+      </View>
     </View>
   );
 }
